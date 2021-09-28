@@ -35,6 +35,7 @@ to
 option(LWS_WITH_SECURE_STREAMS "Secure Streams protocol-agnostic API" ON)
 ...
 ```
+Build the library
 ```
 cmake .
 make && sudo make install
