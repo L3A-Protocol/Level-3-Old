@@ -10,6 +10,7 @@ git submodule update --init --recursive
 
 Install build tools
 ```
+sudo apt-get update
 sudo apt  install cmake
 sudo apt-get install build-essential
 sudo apt-get install libssl-dev
