@@ -17,8 +17,25 @@ sudo apt-get install libssl-dev
 ```
 
 Build & install libwebsockets
+
 ```
 cd libwebsockets/
+```
+Fix a confuguration bug in the librarary source
+
+Open `libwebsockets/CMakeLists.txt` and change
+```
+...
+option(LWS_WITH_SECURE_STREAMS "Secure Streams protocol-agnostic API" OM)
+...
+```
+to
+```
+...
+option(LWS_WITH_SECURE_STREAMS "Secure Streams protocol-agnostic API" ON)
+...
+```
+```
 cmake .
 make && sudo make install
 ```
