@@ -1,5 +1,5 @@
 /*
- * lws-minimal-secure-streams-binance
+ * lws-bybit
  *
  * Written in 2010-2021 by Andy Green <andy@warmcat.com>
  *                         Kutoga <kutoga@user.github.invalid>
