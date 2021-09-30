@@ -14,6 +14,7 @@ sudo apt-get update
 sudo apt  install cmake
 sudo apt-get install build-essential
 sudo apt-get install libssl-dev
+sudo apt install zlib1g-dev
 ```
 
 Build & install libwebsockets
@@ -34,10 +35,17 @@ to
 ...
 option(LWS_WITH_SECURE_STREAMS "Secure Streams protocol-agnostic API" ON)
 ...
+
+To make the sample at `libwebsockets/minimal-examples/client/binance$` work enable Extensions
+```
+option(LWS_WITHOUT_EXTENSIONS "Don't compile with extensions" OFF)
+```
+
 ```
 Build the library
 ```
 cmake .
 make && sudo make install
 ```
+
 
