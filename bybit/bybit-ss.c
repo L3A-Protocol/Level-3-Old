@@ -42,6 +42,13 @@ LWS_SS_USER_TYPEDEF
 
 	range_t			e_lat_range;
 	range_t			price_range;
+
+	char			msg[64];
+	const char		*payload;
+	size_t			size;
+	size_t			pos;
+
+	int			count;
 } bybit_t;
 
 
@@ -81,6 +88,16 @@ static void
 sul_hz_cb(lws_sorted_usec_list_t *sul)
 {
 	bybit_t *bin = lws_container_of(sul, bybit_t, sul_hz);
+	bybit_t *g = bin;
+
+	// /* provide a hint about the payload size */
+	g->pos = 0;
+	g->payload = g->msg;
+	g->size = (size_t)lws_snprintf(g->msg, sizeof(g->msg),
+					"{\"op\": \"subscribe\", \"args\": [\"orderBookL2_25.BTCUSD\"]}");
+
+	if (lws_ss_request_tx_len(lws_ss_from_user(g), (unsigned long)g->size))
+		lwsl_notice("%s: req failed\n", __func__);
 
 	/*
 	 * We are called once a second to dump statistics on the connection
@@ -120,29 +137,30 @@ bybit_transfer_callback(void *userobj, lws_ss_tx_ordinal_t ord, uint8_t *buf, si
 {
 	bybit_t *bin = (bybit_t *)userobj;
 	lws_ss_state_return_t r = LWSSSSRET_OK;
+	bybit_t *g = bin;
 
 	lwsl_user("bybit_transfer_callback");
 
-	// if (g->size == g->pos)
-	// 	return LWSSSSRET_TX_DONT_SEND;
+	if (g->size == g->pos)
+		return LWSSSSRET_TX_DONT_SEND;
 
-	// if (*len > g->size - g->pos)
-	// 	*len = g->size - g->pos;
+	if (*len > g->size - g->pos)
+		*len = g->size - g->pos;
 
-	// if (!g->pos)
-	// 	*flags |= LWSSS_FLAG_SOM;
+	if (!g->pos)
+		*flags |= LWSSS_FLAG_SOM;
 
-	// memcpy(buf, g->payload + g->pos, *len);
-	// g->pos += *len;
+	memcpy(buf, g->payload + g->pos, *len);
+	g->pos += *len;
 
-	// if (g->pos != g->size)
-	// 	/* more to do */
-	// 	r = lws_ss_request_tx(lws_ss_from_user(g));
-	// else
-	// 	*flags |= LWSSS_FLAG_EOM;
+	if (g->pos != g->size)
+		/* more to do */
+		r = lws_ss_request_tx(lws_ss_from_user(g));
+	else
+		*flags |= LWSSS_FLAG_EOM;
 
-	// lwsl_ss_user(lws_ss_from_user(g), "TX %zu, flags 0x%x, r %d", *len,
-	// 				  (unsigned int)*flags, (int)r);
+	lwsl_ss_user(lws_ss_from_user(g), "TX %zu, flags 0x%x, r %d", *len,
+					  (unsigned int)*flags, (int)r);
 
 	return r;
 }
@@ -158,6 +176,7 @@ bybit_receive_callback(void *userobj, const uint8_t *in, size_t len, int flags)
 	const char *p;
 	size_t alen;
 
+	lwsl_user("bybit_receive_callback %s", in);
 	now_us = (uint64_t)get_us_timeofday();
 
 	p = lws_json_simple_find((const char *)in, len, "\"depthUpdate\"",
@@ -231,7 +250,7 @@ bybit_state(void *userobj, void *h_src, lws_ss_constate_t state,
 }
 
 LWS_SS_INFO("bybit", bybit_t)
-	.rx			  = bybit_receive_callback,
+	.rx           = bybit_receive_callback,
 	.tx           = bybit_transfer_callback,
 	.state        = bybit_state,
 };
