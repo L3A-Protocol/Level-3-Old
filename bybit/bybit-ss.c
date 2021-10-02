@@ -42,7 +42,7 @@ LWS_SS_USER_TYPEDEF
 
 	range_t			e_lat_range;
 	range_t			price_range;
-} binance_t;
+} bybit_t;
 
 
 static void
@@ -80,7 +80,7 @@ pennies(const char *s)
 static void
 sul_hz_cb(lws_sorted_usec_list_t *sul)
 {
-	binance_t *bin = lws_container_of(sul, binance_t, sul_hz);
+	bybit_t *bin = lws_container_of(sul, bybit_t, sul_hz);
 
 	/*
 	 * We are called once a second to dump statistics on the connection
@@ -114,11 +114,42 @@ sul_hz_cb(lws_sorted_usec_list_t *sul)
 	test_result = 0;
 }
 
+static lws_ss_state_return_t
+bybit_transfer_callback(void *userobj, lws_ss_tx_ordinal_t ord, uint8_t *buf, size_t *len,
+	     int *flags)
+{
+	bybit_t *bin = (bybit_t *)userobj;
+	lws_ss_state_return_t r = LWSSSSRET_OK;
+
+	// if (g->size == g->pos)
+	// 	return LWSSSSRET_TX_DONT_SEND;
+
+	// if (*len > g->size - g->pos)
+	// 	*len = g->size - g->pos;
+
+	// if (!g->pos)
+	// 	*flags |= LWSSS_FLAG_SOM;
+
+	// memcpy(buf, g->payload + g->pos, *len);
+	// g->pos += *len;
+
+	// if (g->pos != g->size)
+	// 	/* more to do */
+	// 	r = lws_ss_request_tx(lws_ss_from_user(g));
+	// else
+	// 	*flags |= LWSSS_FLAG_EOM;
+
+	// lwsl_ss_user(lws_ss_from_user(g), "TX %zu, flags 0x%x, r %d", *len,
+	// 				  (unsigned int)*flags, (int)r);
+
+	return r;
+}
+
 
 static lws_ss_state_return_t
-binance_rx(void *userobj, const uint8_t *in, size_t len, int flags)
+bybit_receive_callback(void *userobj, const uint8_t *in, size_t len, int flags)
 {
-	binance_t *bin = (binance_t *)userobj;
+	bybit_t *bin = (bybit_t *)userobj;
 	uint64_t latency_us, now_us;
 	char numbuf[16];
 	uint64_t price;
@@ -168,10 +199,10 @@ binance_rx(void *userobj, const uint8_t *in, size_t len, int flags)
 }
 
 static lws_ss_state_return_t
-binance_state(void *userobj, void *h_src, lws_ss_constate_t state,
+bybit_state(void *userobj, void *h_src, lws_ss_constate_t state,
 	      lws_ss_tx_ordinal_t ack)
 {
-	binance_t *bin = (binance_t *)userobj;
+	bybit_t *bin = (bybit_t *)userobj;
 
 	lwsl_ss_info(bin->ss, "%s (%d), ord 0x%x",
 		     lws_ss_state_name((int)state), state, (unsigned int)ack);
@@ -197,7 +228,8 @@ binance_state(void *userobj, void *h_src, lws_ss_constate_t state,
 	return LWSSSSRET_OK;
 }
 
-LWS_SS_INFO("binance", binance_t)
-	.rx			  = binance_rx,
-	.state			  = binance_state,
+LWS_SS_INFO("binance", bybit_t)
+	.rx			  = bybit_receive_callback,
+	.tx           = bybit_transfer_callback,
+	.state        = bybit_state,
 };
