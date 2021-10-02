@@ -22,6 +22,11 @@ Lws must have been built with `LWS_ROLE_WS=1`, `LWS_WITH_SECURE_STREAMS=1`, and
  $ cmake . && make
 ```
 
+Debug configurarion 
+
+```
+ $ cmake . -DCMAKE_BUILD_TYPE=DEBUG && make
+```
 ## Commandline Options
 
 Option|Meaning
