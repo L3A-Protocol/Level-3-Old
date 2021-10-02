@@ -26,10 +26,12 @@
 
 #include <libwebsockets.h>
 #include <signal.h>
+#include <stdbool.h>
 
 static struct lws_context *cx;
 static int interrupted;
 int test_result = 1;
+char topic[64] = {0};
 
 extern const lws_ss_info_t ssi_bybit_t;
 
@@ -48,8 +50,19 @@ sigint_handler(int sig)
 	lws_default_loop_exit(cx);
 }
 
+int verify_topic(char * topic)
+{
+	if (!topic) return false;
+	if (!strcmp(topic,"orderBookL2_25.BTCUSD")) return true;
+	if (!strcmp(topic,"orderBook_200.100ms.BTCUSD")) return true;
+	if (!strcmp(topic,"instrument_info.100ms.BTCUSD")) return true;
+	return false;
+}
+
 int main(int argc, const char **argv)
 {
+	const char * topic_cmd = NULL;
+
 	// lws_set_log_level(LLL_EXT, NULL);
 	struct lws_context_creation_info info;
 
@@ -57,7 +70,21 @@ int main(int argc, const char **argv)
 	lws_cmdline_option_handle_builtin(argc, argv, &info);
 	signal(SIGINT, sigint_handler);
 
-	lwsl_user("LWS minimal Secure Streams bybit client\n");
+	if (!(topic_cmd = lws_cmdline_option(argc, argv, "--topic")))
+	{
+		lwsl_user("LWS bybit client topic not specified");
+		return	-1;
+	}
+
+	strcpy(topic, topic_cmd);
+
+	if (false == verify_topic(topic))
+	{
+		lwsl_user("LWS bybit client invalid topic %s\n", topic);
+		return	-1;
+	}
+
+	lwsl_user("LWS bybit client for topic: %s\n", topic);
 
 	info.extensions = extensions;
 

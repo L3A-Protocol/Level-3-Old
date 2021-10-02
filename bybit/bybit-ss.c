@@ -28,6 +28,7 @@
 #include <ctype.h>
 
 extern int test_result;
+extern char topic[64];
 
 typedef struct range {
 	uint64_t		sum;
@@ -51,15 +52,6 @@ LWS_SS_USER_TYPEDEF
 	int			count;
 } bybit_t;
 
-
-static void
-range_reset(range_t *r)
-{
-	r->sum = r->highest = 0;
-	r->lowest = 999999999999ull;
-	r->samples = 0;
-}
-
 static uint64_t
 get_us_timeofday(void)
 {
@@ -69,19 +61,6 @@ get_us_timeofday(void)
 
 	return (uint64_t)((lws_usec_t)tv.tv_sec * LWS_US_PER_SEC) +
 			  (uint64_t)tv.tv_usec;
-}
-
-static uint64_t
-pennies(const char *s)
-{
-	uint64_t price = (uint64_t)atoll(s) * 100;
-
-	s = strchr(s, '.');
-
-	if (s && isdigit(s[1]) && isdigit(s[2]))
-		price = price + (uint64_t)((10 * (s[1] - '0')) + (s[2] - '0'));
-
-	return price;
 }
 
 static void
@@ -94,7 +73,7 @@ sul_hz_cb(lws_sorted_usec_list_t *sul)
 	g->pos = 0;
 	g->payload = g->msg;
 	g->size = (size_t)lws_snprintf(g->msg, sizeof(g->msg),
-					"{\"op\": \"subscribe\", \"args\": [\"orderBookL2_25.BTCUSD\"]}");
+					"{\"op\": \"subscribe\", \"args\": [\"%s\"]}",topic);
 
 	if (lws_ss_request_tx_len(lws_ss_from_user(g), (unsigned long)g->size))
 		lwsl_notice("%s: req failed\n", __func__);
@@ -105,30 +84,6 @@ sul_hz_cb(lws_sorted_usec_list_t *sul)
 
 	lws_sul_schedule(lws_ss_get_context(bin->ss), 0, &bin->sul_hz,
 			 sul_hz_cb, LWS_US_PER_SEC);
-
-	if (bin->price_range.samples)
-		lwsl_ss_user(lws_ss_from_user(bin),
-			    "price: min: %llu¢, max: %llu¢, avg: %llu¢, "
-			    "(%d prices/s)",
-			    (unsigned long long)bin->price_range.lowest,
-			    (unsigned long long)bin->price_range.highest,
-			    (unsigned long long)(bin->price_range.sum /
-						    bin->price_range.samples),
-			    bin->price_range.samples);
-	if (bin->e_lat_range.samples)
-		lwsl_ss_user(lws_ss_from_user(bin),
-			    "elatency: min: %llums, max: %llums, "
-			    "avg: %llums, (%d msg/s)",
-			    (unsigned long long)bin->e_lat_range.lowest / 1000,
-			    (unsigned long long)bin->e_lat_range.highest / 1000,
-			    (unsigned long long)(bin->e_lat_range.sum /
-					   bin->e_lat_range.samples) / 1000,
-			    bin->e_lat_range.samples);
-
-	range_reset(&bin->e_lat_range);
-	range_reset(&bin->price_range);
-
-	test_result = 0;
 }
 
 static lws_ss_state_return_t
@@ -176,45 +131,14 @@ bybit_receive_callback(void *userobj, const uint8_t *in, size_t len, int flags)
 	const char *p;
 	size_t alen;
 
-	lwsl_user("bybit_receive_callback %s", in);
-	now_us = (uint64_t)get_us_timeofday();
+	// now_us = (uint64_t)get_us_timeofday();
 
-	p = lws_json_simple_find((const char *)in, len, "\"depthUpdate\"",
+	p = lws_json_simple_find((const char *)in, len, "\"topic\"",
 				 &alen);
 	if (!p)
 		return LWSSSSRET_OK;
 
-	p = lws_json_simple_find((const char *)in, len, "\"E\":", &alen);
-	if (!p) {
-		lwsl_err("%s: no E JSON\n", __func__);
-		return LWSSSSRET_OK;
-	}
-
-	lws_strnncpy(numbuf, p, alen, sizeof(numbuf));
-	latency_us = now_us - ((uint64_t)atoll(numbuf) * LWS_US_PER_MS);
-
-	if (latency_us < bin->e_lat_range.lowest)
-		bin->e_lat_range.lowest = latency_us;
-	if (latency_us > bin->e_lat_range.highest)
-		bin->e_lat_range.highest = latency_us;
-
-	bin->e_lat_range.sum += latency_us;
-	bin->e_lat_range.samples++;
-
-	p = lws_json_simple_find((const char *)in, len, "\"a\":[[\"", &alen);
-	if (!p)
-		return LWSSSSRET_OK;
-
-	lws_strnncpy(numbuf, p, alen, sizeof(numbuf));
-	price = pennies(numbuf);
-
-	if (price < bin->price_range.lowest)
-		bin->price_range.lowest = price;
-	if (price > bin->price_range.highest)
-		bin->price_range.highest = price;
-
-	bin->price_range.sum += price;
-	bin->price_range.samples++;
+	lwsl_user("%s", in);
 
 	return LWSSSSRET_OK;
 }
@@ -233,8 +157,6 @@ bybit_state(void *userobj, void *h_src, lws_ss_constate_t state,
 	case LWSSSCS_CONNECTED:
 		lws_sul_schedule(lws_ss_get_context(bin->ss), 0, &bin->sul_hz,
 				 sul_hz_cb, LWS_US_PER_SEC);
-		range_reset(&bin->e_lat_range);
-		range_reset(&bin->price_range);
 
 		return LWSSSSRET_OK;
 
