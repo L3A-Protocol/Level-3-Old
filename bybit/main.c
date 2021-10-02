@@ -50,13 +50,14 @@ sigint_handler(int sig)
 
 int main(int argc, const char **argv)
 {
+	// lws_set_log_level(LLL_EXT, NULL);
 	struct lws_context_creation_info info;
 
 	lws_context_info_defaults(&info, "example-policy.json");
 	lws_cmdline_option_handle_builtin(argc, argv, &info);
 	signal(SIGINT, sigint_handler);
 
-	lwsl_user("LWS minimal Secure Streams binance client\n");
+	lwsl_user("LWS minimal Secure Streams bybit client\n");
 
 	info.extensions = extensions;
 

@@ -121,6 +121,8 @@ bybit_transfer_callback(void *userobj, lws_ss_tx_ordinal_t ord, uint8_t *buf, si
 	bybit_t *bin = (bybit_t *)userobj;
 	lws_ss_state_return_t r = LWSSSSRET_OK;
 
+	lwsl_user("bybit_transfer_callback");
+
 	// if (g->size == g->pos)
 	// 	return LWSSSSRET_TX_DONT_SEND;
 
@@ -228,7 +230,7 @@ bybit_state(void *userobj, void *h_src, lws_ss_constate_t state,
 	return LWSSSSRET_OK;
 }
 
-LWS_SS_INFO("binance", bybit_t)
+LWS_SS_INFO("bybit", bybit_t)
 	.rx			  = bybit_receive_callback,
 	.tx           = bybit_transfer_callback,
 	.state        = bybit_state,
