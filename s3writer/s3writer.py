@@ -3,6 +3,7 @@ import sys
 import errno
 from dotenv import load_dotenv
 from osbot_utils.utils.Files import file_exists
+from osbot_utils.utils.Json import str_to_json
 
 def readline(fifo):
     line = ''
@@ -52,8 +53,14 @@ with open(FIFO) as fifo:
     print("FIFO opened")
     while True:
         # data = fifo.read()
-        data = readline(fifo)
-        if len(data) == 0:
+        line = readline(fifo)
+        if len(line) == 0:
             print("Writer closed")
             break
-        print(data)
+        print (line)
+        try:
+            data = str_to_json(line)
+            if "cross_seq" in data:
+                print(data["cross_seq"])
+        except Exception as ex:
+            print (ex)
