@@ -2,7 +2,7 @@ import os
 import sys
 import errno
 from dotenv import load_dotenv
-from osbot_utils.utils.Files import file_exists
+from osbot_utils.utils.Files import file_exists, file_write, file_delete
 from osbot_utils.utils.Json import str_to_json
 from s3_storage import s3_storage
 
@@ -73,6 +73,11 @@ with open(FIFO) as fifo:
         try:
             data = str_to_json(line)
             if "cross_seq" in data:
-                print(data["cross_seq"])
+                cross_seq = data["cross_seq"]
+                file_path = f'/tmp/{cross_seq}'
+                print(file_path)
+                file_write(file_path, line)
+                S3.upload_file(bucket_name, f'{topic}/{cross_seq}', file_path)
+                file_delete(file_path)
         except Exception as ex:
             print (ex)
