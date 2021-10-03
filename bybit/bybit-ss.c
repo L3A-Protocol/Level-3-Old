@@ -149,7 +149,8 @@ bybit_receive_callback(void *userobj, const uint8_t *in, size_t len, int flags)
 	// lwsl_user("%s", in);
 	if (fifo_descriptor >= 0) // the fifo is valid
 	{
-		write(fifo_descriptor, in, strlen(in)+1);
+		write(fifo_descriptor, in, strlen(in));
+		write(fifo_descriptor, "\n", 1);
 	}
 
 	return LWSSSSRET_OK;
