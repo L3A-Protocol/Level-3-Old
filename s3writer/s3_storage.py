@@ -6,7 +6,6 @@ import logging as logger
 
 from botocore.exceptions import ClientError
 from osbot_utils.utils.Files import temp_folder, path_combine, file_exists, folder_create, file_write
-from cdr_plugin_folder_to_folder.common_settings.Config import Config
 
 class s3_storage:
     AWS_FOLDER = path_combine(Path.home(),'.aws')
@@ -23,7 +22,6 @@ class s3_storage:
     def __init__(self):
         if hasattr(self, 'enabled') is False:                     # only set these values first time around
             self.enabled     = False
-            self.config      = Config()
             self.s3          = None
             self.s3_resource = None
             self.buckets     = []

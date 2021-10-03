@@ -4,6 +4,7 @@ import errno
 from dotenv import load_dotenv
 from osbot_utils.utils.Files import file_exists
 from osbot_utils.utils.Json import str_to_json
+from s3_storage import s3_storage
 
 def readline(fifo):
     line = ''
@@ -17,8 +18,9 @@ def readline(fifo):
     return line
 
 load_dotenv(override=True)
-c_bin_path = os.getenv("C_BINARY_PATH", None)
-topic      = os.getenv("TOPIC", None)
+c_bin_path  = os.getenv("C_BINARY_PATH", None)
+topic       = os.getenv("TOPIC", None)
+bucket_name = os.getenv("BUCKET_NAME", None)
 
 if not c_bin_path:
     print ("The binary path is not specified")
@@ -28,11 +30,16 @@ if not topic:
     print ("The topic is not specified")
     sys.exit()
 
+if not bucket_name:
+    print ("The bucket_name is not specified")
+    sys.exit()
+
 if not file_exists(c_bin_path):
     print (f"File {c_bin_path} does not exist")
     sys.exit()
 
 FIFO = f'/tmp/{topic}'
+S3 = s3_storage()
 
 try:
     os.system(f'{c_bin_path} --topic {topic} &')
@@ -57,7 +64,6 @@ with open(FIFO) as fifo:
         if len(line) == 0:
             print("Writer closed")
             break
-        print (line)
         try:
             data = str_to_json(line)
             if "cross_seq" in data:
