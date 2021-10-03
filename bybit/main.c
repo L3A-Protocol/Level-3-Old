@@ -32,6 +32,7 @@ static struct lws_context *cx;
 static int interrupted;
 int test_result = 1;
 char topic[64] = {0};
+char fifo[64] = {0}; // a named pipe to write out the data
 
 extern const lws_ss_info_t ssi_bybit_t;
 
@@ -85,6 +86,7 @@ int main(int argc, const char **argv)
 	}
 
 	lwsl_user("LWS bybit client for topic: %s\n", topic);
+	lws_snprintf(fifo, sizeof(fifo),"/tmp/%s",topic);
 
 	info.extensions = extensions;
 

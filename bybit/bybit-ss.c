@@ -27,8 +27,17 @@
 #include <signal.h>
 #include <ctype.h>
 
+#include <stdio.h>
+#include <string.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+
 extern int test_result;
 extern char topic[64];
+extern char fifo[64];
+int fifo_descriptor = -1;
 
 typedef struct range {
 	uint64_t		sum;
@@ -120,7 +129,6 @@ bybit_transfer_callback(void *userobj, lws_ss_tx_ordinal_t ord, uint8_t *buf, si
 	return r;
 }
 
-
 static lws_ss_state_return_t
 bybit_receive_callback(void *userobj, const uint8_t *in, size_t len, int flags)
 {
@@ -138,7 +146,11 @@ bybit_receive_callback(void *userobj, const uint8_t *in, size_t len, int flags)
 	if (!p)
 		return LWSSSSRET_OK;
 
-	lwsl_user("%s", in);
+	// lwsl_user("%s", in);
+	if (fifo_descriptor >= 0) // the fifo is valid
+	{
+		write(fifo_descriptor, in, strlen(in)+1);
+	}
 
 	return LWSSSSRET_OK;
 }
@@ -157,11 +169,22 @@ bybit_state(void *userobj, void *h_src, lws_ss_constate_t state,
 	case LWSSSCS_CONNECTED:
 		lws_sul_schedule(lws_ss_get_context(bin->ss), 0, &bin->sul_hz,
 				 sul_hz_cb, LWS_US_PER_SEC);
-
+		mkfifo(fifo, 0666);
+		fifo_descriptor = open(fifo, O_WRONLY);
+		if (fifo_descriptor >= 0) // the fifo is valid
+		{
+			lwsl_user("Pipe %s created",fifo);
+		}
 		return LWSSSSRET_OK;
 
 	case LWSSSCS_DISCONNECTED:
 		lws_sul_cancel(&bin->sul_hz);
+		if (fifo_descriptor >= 0) // the fifo is valid
+		{
+			close(fifo_descriptor);
+			fifo_descriptor = -1;
+			lwsl_user("Pipe %s closed",fifo);
+		}
 		break;
 
 	default:
