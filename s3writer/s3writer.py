@@ -38,8 +38,14 @@ if not file_exists(c_bin_path):
     print (f"File {c_bin_path} does not exist")
     sys.exit()
 
-FIFO = f'/tmp/{topic}'
 S3 = s3_storage()
+
+if not S3.get_bucket(f's3://{bucket_name}'):
+    print (f"Bucket {bucket_name} cannot be found")
+    sys.exit()
+
+FIFO = f'/tmp/{topic}'
+
 
 try:
     os.system(f'{c_bin_path} --topic {topic} &')
