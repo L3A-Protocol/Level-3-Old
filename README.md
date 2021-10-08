@@ -73,4 +73,9 @@ Then execute the following:
 sudo docker run --env-file s3writer/.env gdafund/bybit:0.01
 ```
 
+## References
+
+[Deploying a Docker container with ECS and Fargate](https://towardsdatascience.com/deploying-a-docker-container-with-ecs-and-fargate-7b0cbc9cd608)  
+[Monitoring your container instances](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_cloudwatch_logs.html)
+
 
