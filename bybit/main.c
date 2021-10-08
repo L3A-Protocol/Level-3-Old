@@ -79,11 +79,11 @@ int main(int argc, const char **argv)
 
 	strcpy(topic, topic_cmd);
 
-	if (false == verify_topic(topic))
-	{
-		lwsl_user("LWS bybit client invalid topic %s\n", topic);
-		return	-1;
-	}
+	// if (false == verify_topic(topic))
+	// {
+	// 	lwsl_user("LWS bybit client invalid topic %s\n", topic);
+	// 	return	-1;
+	// }
 
 	lwsl_user("LWS bybit client for topic: %s\n", topic);
 	lws_snprintf(fifo, sizeof(fifo),"/tmp/%s",topic);

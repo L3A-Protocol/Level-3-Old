@@ -30,3 +30,6 @@ boto3
 
 # system info
 psutil
+
+numpy
+pandas
