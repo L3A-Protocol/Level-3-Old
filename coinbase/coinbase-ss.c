@@ -53,7 +53,7 @@ LWS_SS_USER_TYPEDEF
 	range_t			e_lat_range;
 	range_t			price_range;
 
-	char			msg[64];
+	char			msg[100];
 	const char		*payload;
 	size_t			size;
 	size_t			pos;
@@ -82,7 +82,7 @@ sul_hz_cb(lws_sorted_usec_list_t *sul)
 	g->pos = 0;
 	g->payload = g->msg;
 	g->size = (size_t)lws_snprintf(g->msg, sizeof(g->msg),
-					"{\"type\": \"unsubscribe\", \"channels\": [{\"name\": \"full\", \"product_ids\": [\"%s\"]}]}",topic);
+					"{\"type\": \"subscribe\", \"channels\": [{\"name\": \"full\", \"product_ids\": [\"%s\"]}]}",topic);
 
 	if (lws_ss_request_tx_len(lws_ss_from_user(g), (unsigned long)g->size))
 		lwsl_notice("%s: req failed\n", __func__);
@@ -103,7 +103,7 @@ coinbase_transfer_callback(void *userobj, lws_ss_tx_ordinal_t ord, uint8_t *buf,
 	lws_ss_state_return_t r = LWSSSSRET_OK;
 	coinbase_t *g = bin;
 
-	lwsl_user("coinbase_transfer_callback");
+	lwsl_user("coinbase_transfer_callback %s", 	g->msg);
 
 	if (g->size == g->pos)
 		return LWSSSSRET_TX_DONT_SEND;
