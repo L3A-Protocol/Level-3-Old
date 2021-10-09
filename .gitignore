@@ -67,3 +67,6 @@ coinbase/CMakeCache.txt
 coinbase/Makefile
 coinbase/cmake_install.cmake
 coinbase/lws-coinbase
+
+coinbase/s3writer/__pycache__/*
+coinbase/s3writer/.env
