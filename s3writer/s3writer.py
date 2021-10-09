@@ -2,10 +2,10 @@ import os
 import sys
 import errno
 from dotenv import load_dotenv
-from osbot_utils.utils.Files import file_exists, file_write, file_delete
+from osbot_utils.utils.Files import file_exists
 from osbot_utils.utils.Json import str_to_json
-from s3_storage import s3_storage
 from datetime import datetime
+from datetime import timezone
 
 import math
 import boto3
@@ -63,18 +63,10 @@ s3 = boto3.resource(
     config=Config(signature_version='s3v4')
 )
 
-# global book
-# global snap_shot
-
 book = pandas.DataFrame
 snap_shot = pandas.DataFrame
 old_timestamp = 0
-
-# S3 = s3_storage()
-
-# if not S3.bucket_exists(bucket_name):
-#     print (f"Bucket {bucket_name} cannot be found")
-#     sys.exit()
+old_raw_data_timestamp = 0
 
 FIFO = f'/tmp/{topic}'
 
@@ -122,6 +114,8 @@ dtypes = np.dtype([
 data = np.zeros(0, dtype=dtypes)
 snap_shot = pandas.DataFrame(data)
 
+raw_lines = ''
+
 def has_minute_increased(old_ts, new_ts):
     """
     compares the minute from the unix time stamp, if it increments returns true
@@ -131,9 +125,11 @@ def has_minute_increased(old_ts, new_ts):
     """
     if old_ts == 0:
         return "Go"
-    old = datetime.fromtimestamp(int(old_ts) / 1000000)
-    new = datetime.fromtimestamp(int(new_ts) / 1000000)
-    if new.minute > old.minute:
+
+    old_min = datetime.utcfromtimestamp(old_ts).strftime('%M')
+    new_min = datetime.utcfromtimestamp(new_ts).strftime('%M')
+
+    if old_min != new_min:
         return "Flush"
     else:
         return "Go"
@@ -141,20 +137,22 @@ def has_minute_increased(old_ts, new_ts):
 def s3_bucket_folders(data, _symbol, year, month, day):
     return r'true-alpha/exchange=ByBit/'+data+r'/symbol='+_symbol+'/year='+str(year)+'/month=' + str(month) + '/day=' + str(day) + '/'
 
+def s3_bucket_raw_data_folders(data, _symbol, year, month, day):
+    return r'raw-data/exchange=ByBit/'+data+r'/symbol='+_symbol+'/year='+str(year)+'/month=' + str(month) + '/day=' + str(day) + '/'
+
 symbol_ws = topic
 
-def process_message(message):
+def process_json_data(json_string):
     global book
     global snap_shot
     global old_timestamp
     global s3
 
     now = datetime.utcnow()
-    data = str_to_json(message)
-    # print(f'on_message {data}')
+    data = str_to_json(json_string)
 
     if not 'type' in data:
-        print("type not found")
+        # print("type not found")
         return 1
 
     seq = data['cross_seq']
@@ -212,7 +210,7 @@ def process_message(message):
                                     'our_unix_time': now}, ignore_index=True)
         # TODO: Finish s3 flush code for LOB
         if has_minute_increased(old_timestamp, timestamp) == "Flush":
-            print(str(old_timestamp) + ' flush ' + str(timestamp))
+            # print(str(old_timestamp) + ' flush ' + str(timestamp))
             book_json = book.to_json(orient='records', lines=True)
             folders = s3_bucket_folders('lob_events', symbol_ws, year, month, day)
             s3.Bucket(bucket_name).put_object(Key=f'{folders}{seq}.json', Body=str(book_json))
@@ -242,6 +240,29 @@ def process_message(message):
         print("unknown - type!!!")
         # TODO: Need to close down Micro Service Task
 
+def process_raw_line(line):
+    global raw_lines
+    global old_raw_data_timestamp
+
+    raw_lines = raw_lines + line
+
+    dt = datetime.now(timezone.utc)
+    utc_time = dt.replace(tzinfo=timezone.utc)
+    utc_timestamp = utc_time.timestamp()
+
+    year = datetime.utcfromtimestamp(utc_timestamp).strftime('%Y')
+    month = datetime.utcfromtimestamp(utc_timestamp).strftime('%m')
+    day = datetime.utcfromtimestamp(utc_timestamp).strftime('%d')
+
+    seq = (int)(utc_timestamp * 1000000)
+
+    if has_minute_increased(old_raw_data_timestamp, utc_timestamp) == "Flush":
+        # print(str(old_raw_data_timestamp) + ' flush ' + str(utc_timestamp))
+        folders = s3_bucket_raw_data_folders('lob_events', symbol_ws, year, month, day)
+        s3.Bucket(bucket_name).put_object(Key=f'{folders}{seq}', Body=raw_lines)
+        raw_lines = ''
+
+    old_raw_data_timestamp = utc_timestamp
 
 try:
     os.system(f'{c_bin_path} --topic {topic} &')
@@ -257,9 +278,8 @@ except OSError as oe:
         print (f"Failed to create the pipe: {FIFO}")
         sys.exit()
 
-print("Opening FIFO...")
 with open(FIFO) as fifo:
-    print("FIFO opened")
+    print(f'FIFO {FIFO} opened')
     while True:
         line = readline(fifo)
 
@@ -267,10 +287,18 @@ with open(FIFO) as fifo:
             print("Writer closed")
             break
 
+        try:
+            process_raw_line(line)
+        except Exception as ex:
+            print (f'ERROR in process_raw_line: {ex}')
+            continue
+
         if not line.endswith('}\n'):
             # not a valid JSON
             continue
+
         try:
-            process_message(line)
+            process_json_data(line)
         except Exception as ex:
-            print (ex)
+            print (f'ERROR in process_json_data: {ex}')
+            continue
