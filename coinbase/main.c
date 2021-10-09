@@ -54,9 +54,8 @@ sigint_handler(int sig)
 int verify_topic(char * topic)
 {
 	if (!topic) return false;
-	if (!strcmp(topic,"orderBookL2_25.BTCUSD")) return true;
-	if (!strcmp(topic,"orderBook_200.100ms.BTCUSD")) return true;
-	if (!strcmp(topic,"instrument_info.100ms.BTCUSD")) return true;
+	if (!strcmp(topic,"BTC-USD")) return true;
+	if (!strcmp(topic,"ETH-USD")) return true;
 	return false;
 }
 
@@ -78,6 +77,12 @@ int main(int argc, const char **argv)
 	}
 
 	strcpy(topic, topic_cmd);
+
+	if (false == verify_topic(topic))
+	{
+		lwsl_user("LWS coinbase client invalid topic %s\n", topic);
+		return	-1;
+	}
 
 	lwsl_user("LWS coinbase client for topic: %s\n", topic);
 	lws_snprintf(fifo, sizeof(fifo),"/tmp/%s",topic);

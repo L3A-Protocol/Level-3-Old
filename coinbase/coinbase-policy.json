@@ -35,7 +35,7 @@
 			"endpoint":		"ws-feed.pro.coinbase.com",
 			"port":			443,
 			"protocol":		"ws",
-			"http_url":		"",
+			"http_url":		"/",
 			"nailed_up":        	true,
 			"ws_prioritize_reads":	true,
 			"tls":			true,
