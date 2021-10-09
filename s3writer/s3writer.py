@@ -137,8 +137,8 @@ def has_minute_increased(old_ts, new_ts):
 def s3_bucket_folders(data, _symbol, year, month, day):
     return r'true-alpha/exchange=ByBit/'+data+r'/symbol='+_symbol+'/year='+str(year)+'/month=' + str(month) + '/day=' + str(day) + '/'
 
-def s3_bucket_raw_data_folders(data, _symbol, year, month, day):
-    return r'raw-data/exchange=ByBit/'+data+r'/symbol='+_symbol+'/year='+str(year)+'/month=' + str(month) + '/day=' + str(day) + '/'
+def s3_bucket_raw_data_folders(topic, year, month, day):
+    return r'raw-data/exchange=ByBit/'+topic+r'/year='+str(year)+'/month=' + str(month) + '/day=' + str(day) + '/'
 
 symbol_ws = topic
 
@@ -258,7 +258,7 @@ def process_raw_line(line):
 
     if has_minute_increased(old_raw_data_timestamp, utc_timestamp) == "Flush":
         # print(str(old_raw_data_timestamp) + ' flush ' + str(utc_timestamp))
-        folders = s3_bucket_raw_data_folders('lob_events', symbol_ws, year, month, day)
+        folders = s3_bucket_raw_data_folders(topic, year, month, day)
         s3.Bucket(bucket_name).put_object(Key=f'{folders}{seq}', Body=raw_lines)
         raw_lines = ''
 
