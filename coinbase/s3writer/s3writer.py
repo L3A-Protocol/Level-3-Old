@@ -7,10 +7,7 @@ from osbot_utils.utils.Json import str_to_json
 from datetime import datetime
 from datetime import timezone
 
-import math
 import boto3
-import numpy as np
-import pandas
 from botocore.client import Config
 
 def readline(fifo):
@@ -63,14 +60,6 @@ s3 = boto3.resource(
     config=Config(signature_version='s3v4')
 )
 
-lob_received = pandas.DataFrame
-lob_open = pandas.DataFrame
-lob_done = pandas.DataFrame
-lob_match = pandas.DataFrame
-lob_change = pandas.DataFrame
-
-# TODO:
-snap_shot = pandas.DataFrame
 old_timestamp = 0
 old_raw_data_timestamp = 0
 
