@@ -61,3 +61,21 @@ bybit/lws-bybit
 
 s3writer/__pycache__/*
 s3writer/.env
+
+coinbase/CMakeFiles/*
+coinbase/CMakeCache.txt
+coinbase/Makefile
+coinbase/cmake_install.cmake
+coinbase/lws-coinbase
+
+coinbase/s3writer/__pycache__/*
+coinbase/s3writer/.env
+
+binance/CMakeFiles/*
+binance/CMakeCache.txt
+binance/Makefile
+binance/cmake_install.cmake
+binance/lws-binance
+
+binance/s3writer/__pycache__/*
+binance/s3writer/.env
