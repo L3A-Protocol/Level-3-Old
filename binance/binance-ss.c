@@ -27,7 +27,15 @@
 #include <signal.h>
 #include <ctype.h>
 
+#include <stdio.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+
 extern int test_result;
+extern char fifo[64];
+int fifo_descriptor = -1;
 
 typedef struct range {
 	uint64_t		sum;
@@ -89,28 +97,6 @@ sul_hz_cb(lws_sorted_usec_list_t *sul)
 	lws_sul_schedule(lws_ss_get_context(bin->ss), 0, &bin->sul_hz,
 			 sul_hz_cb, LWS_US_PER_SEC);
 
-	if (bin->price_range.samples)
-		lwsl_ss_user(lws_ss_from_user(bin),
-			    "price: min: %llu¢, max: %llu¢, avg: %llu¢, "
-			    "(%d prices/s)",
-			    (unsigned long long)bin->price_range.lowest,
-			    (unsigned long long)bin->price_range.highest,
-			    (unsigned long long)(bin->price_range.sum /
-						    bin->price_range.samples),
-			    bin->price_range.samples);
-	if (bin->e_lat_range.samples)
-		lwsl_ss_user(lws_ss_from_user(bin),
-			    "elatency: min: %llums, max: %llums, "
-			    "avg: %llums, (%d msg/s)",
-			    (unsigned long long)bin->e_lat_range.lowest / 1000,
-			    (unsigned long long)bin->e_lat_range.highest / 1000,
-			    (unsigned long long)(bin->e_lat_range.sum /
-					   bin->e_lat_range.samples) / 1000,
-			    bin->e_lat_range.samples);
-
-	range_reset(&bin->e_lat_range);
-	range_reset(&bin->price_range);
-
 	test_result = 0;
 }
 
@@ -125,44 +111,11 @@ binance_rx(void *userobj, const uint8_t *in, size_t len, int flags)
 	const char *p;
 	size_t alen;
 
-	now_us = (uint64_t)get_us_timeofday();
-
-	p = lws_json_simple_find((const char *)in, len, "\"depthUpdate\"",
-				 &alen);
-	if (!p)
-		return LWSSSSRET_OK;
-
-	p = lws_json_simple_find((const char *)in, len, "\"E\":", &alen);
-	if (!p) {
-		lwsl_err("%s: no E JSON\n", __func__);
-		return LWSSSSRET_OK;
+	if (fifo_descriptor >= 0) // the fifo is valid
+	{
+		write(fifo_descriptor, in, strlen(in));
+		write(fifo_descriptor, "\n", 1);
 	}
-
-	lws_strnncpy(numbuf, p, alen, sizeof(numbuf));
-	latency_us = now_us - ((uint64_t)atoll(numbuf) * LWS_US_PER_MS);
-
-	if (latency_us < bin->e_lat_range.lowest)
-		bin->e_lat_range.lowest = latency_us;
-	if (latency_us > bin->e_lat_range.highest)
-		bin->e_lat_range.highest = latency_us;
-
-	bin->e_lat_range.sum += latency_us;
-	bin->e_lat_range.samples++;
-
-	p = lws_json_simple_find((const char *)in, len, "\"a\":[[\"", &alen);
-	if (!p)
-		return LWSSSSRET_OK;
-
-	lws_strnncpy(numbuf, p, alen, sizeof(numbuf));
-	price = pennies(numbuf);
-
-	if (price < bin->price_range.lowest)
-		bin->price_range.lowest = price;
-	if (price > bin->price_range.highest)
-		bin->price_range.highest = price;
-
-	bin->price_range.sum += price;
-	bin->price_range.samples++;
 
 	return LWSSSSRET_OK;
 }
@@ -181,12 +134,24 @@ binance_state(void *userobj, void *h_src, lws_ss_constate_t state,
 	case LWSSSCS_CONNECTED:
 		lws_sul_schedule(lws_ss_get_context(bin->ss), 0, &bin->sul_hz,
 				 sul_hz_cb, LWS_US_PER_SEC);
-		range_reset(&bin->e_lat_range);
-		range_reset(&bin->price_range);
+
+		mkfifo(fifo, 0666);
+		fifo_descriptor = open(fifo, O_WRONLY);
+		if (fifo_descriptor >= 0) // the fifo is valid
+		{
+			lwsl_user("Pipe %s created",fifo);
+		}
 
 		return LWSSSSRET_OK;
 
 	case LWSSSCS_DISCONNECTED:
+		if (fifo_descriptor >= 0) // the fifo is valid
+		{
+			close(fifo_descriptor);
+			fifo_descriptor = -1;
+			lwsl_user("Pipe %s closed",fifo);
+		}
+
 		lws_sul_cancel(&bin->sul_hz);
 		break;
 
@@ -198,6 +163,6 @@ binance_state(void *userobj, void *h_src, lws_ss_constate_t state,
 }
 
 LWS_SS_INFO("binance", binance_t)
-	.rx			  = binance_rx,
-	.state			  = binance_state,
+	.rx	      = binance_rx,
+	.state    = binance_state,
 };
