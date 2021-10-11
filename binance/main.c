@@ -54,7 +54,7 @@ int main(int argc, const char **argv)
 {
 	struct lws_context_creation_info info;
 
-	lws_context_info_defaults(&info, "binance-policy.json");
+	lws_context_info_defaults(&info, "/app/binance-policy.json");
 	lws_cmdline_option_handle_builtin(argc, argv, &info);
 	signal(SIGINT, sigint_handler);
 
