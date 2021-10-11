@@ -340,7 +340,7 @@ except OSError as oe:
         print (f"Failed to create the pipe: {FIFO}")
         sys.exit()
 
-initialize()
+# initialize()
 
 with open(FIFO) as fifo:
     print(f'FIFO {FIFO} opened')
@@ -357,12 +357,12 @@ with open(FIFO) as fifo:
             print (f'ERROR in process_raw_line: {ex}')
             continue
 
-        if not line.endswith('}\n'):
-            # not a valid JSON
-            continue
+        # if not line.endswith('}\n'):
+        #     # not a valid JSON
+        #     continue
 
-        try:
-            process_json_data(line)
-        except Exception as ex:
-            print (f'ERROR in process_json_data: {ex}')
-            continue
+        # try:
+        #     process_json_data(line)
+        # except Exception as ex:
+        #     print (f'ERROR in process_json_data: {ex}')
+        #     continue

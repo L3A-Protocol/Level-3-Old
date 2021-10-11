@@ -179,13 +179,14 @@ coinbase_state(void *userobj, void *h_src, lws_ss_constate_t state,
 		return LWSSSSRET_OK;
 
 	case LWSSSCS_DISCONNECTED:
-		lws_sul_cancel(&bin->sul_hz);
 		if (fifo_descriptor >= 0) // the fifo is valid
 		{
 			close(fifo_descriptor);
 			fifo_descriptor = -1;
 			lwsl_user("Pipe %s closed",fifo);
 		}
+
+		lws_sul_cancel(&bin->sul_hz);
 		break;
 
 	default:
