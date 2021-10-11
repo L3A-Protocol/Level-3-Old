@@ -12,12 +12,12 @@
  *
  * Build lws with -DLWS_WITH_SECURE_STREAMS=1 -DLWS_WITHOUT_EXTENSIONS=0
  *
- * "example-policy.json" contains all the information about endpoints, protocols
+ * "binance-policy.json" contains all the information about endpoints, protocols
  * and connection validation, tagged by streamtype name.
  *
  * The example tries to load it from the cwd, it lives
  * in ./minimal-examples/client/binance dir, so either run it from there, or
- * copy the example-policy.json to your cwd.  It's also possible to put the
+ * copy the binance-policy.json to your cwd.  It's also possible to put the
  * policy json in the code as a string and pass that at context creation time.
  *
  * When built to use the SSPC proxy, the local policy is not used since the
@@ -52,11 +52,11 @@ int main(int argc, const char **argv)
 {
 	struct lws_context_creation_info info;
 
-	lws_context_info_defaults(&info, "example-policy.json");
+	lws_context_info_defaults(&info, "binance-policy.json");
 	lws_cmdline_option_handle_builtin(argc, argv, &info);
 	signal(SIGINT, sigint_handler);
 
-	lwsl_user("LWS minimal Secure Streams binance client\n");
+	lwsl_user("LWS binance client\n");
 
 	info.extensions = extensions;
 

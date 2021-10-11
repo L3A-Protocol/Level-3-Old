@@ -1,4 +1,4 @@
-# lws minimal secure streams binance
+# Binance support
 
 This is a Secure Streams version of minimal-ws-client-binance.
 
