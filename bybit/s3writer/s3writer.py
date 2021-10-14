@@ -106,7 +106,8 @@ def flush_thread_function():
         seq = (int)(utc_timestamp * 1000000)
 
         folders = s3_bucket_raw_data_folders(topic, year, month, day)
-        s3.Bucket(bucket_name).put_object(Key=f'{folders}{seq}', Body=raw_lines)
+        if raw_lines:
+            s3.Bucket(bucket_name).put_object(Key=f'{folders}{seq}', Body=raw_lines)
 
         period = math.floor((utc_timestamp - old_flush_timestamp) * 1000)
         verify_feed_frequency(number_of_lines, period)
