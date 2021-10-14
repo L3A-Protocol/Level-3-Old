@@ -78,7 +78,6 @@ def verify_feed_frequency (number_of_lines, period):
 def process_raw_line(line):
     global raw_lines
     global number_of_lines
-    # global old_flush_timestamp
 
     mutex.acquire()
     try:
@@ -86,25 +85,6 @@ def process_raw_line(line):
         number_of_lines += 1
     finally:
         mutex.release()
-
-    # utc_timestamp = get_current_timestamp()
-
-    # year = datetime.utcfromtimestamp(utc_timestamp).strftime('%Y')
-    # month = datetime.utcfromtimestamp(utc_timestamp).strftime('%m')
-    # day = datetime.utcfromtimestamp(utc_timestamp).strftime('%d')
-
-    # seq = (int)(utc_timestamp * 1000000)
-
-    # if has_minute_increased(old_flush_timestamp, utc_timestamp) == "Flush":
-    #     folders = s3_bucket_raw_data_folders(topic, year, month, day)
-    #     s3.Bucket(bucket_name).put_object(Key=f'{folders}{seq}', Body=raw_lines)
-
-    #     period = math.floor((utc_timestamp - old_flush_timestamp) * 1000)
-    #     verify_feed_frequency(number_of_lines, period)
-    #     old_flush_timestamp = utc_timestamp
-
-    #     raw_lines = ''
-    #     number_of_lines = 0
 
 def readline(fifo):
     line = ''
@@ -128,9 +108,6 @@ def flush_thread_function():
 
         utc_timestamp = get_current_timestamp()
         print(utc_timestamp)
-
-        # if 0 == old_flush_timestamp:
-        #     old_flush_timestamp = utc_timestamp
 
         year = datetime.utcfromtimestamp(utc_timestamp).strftime('%Y')
         month = datetime.utcfromtimestamp(utc_timestamp).strftime('%m')
