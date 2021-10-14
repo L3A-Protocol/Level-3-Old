@@ -59,8 +59,8 @@ bybit/Makefile
 bybit/cmake_install.cmake
 bybit/lws-bybit
 
-s3writer/__pycache__/*
-s3writer/.env
+bybit/ls3writer/__pycache__/*
+bybit/ls3writer/.env
 
 coinbase/CMakeFiles/*
 coinbase/CMakeCache.txt

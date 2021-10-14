@@ -56,22 +56,9 @@ Verify docker has been installed
     docker -v
     Docker version 20.10.8, build 3967b7d
 ```
-## Build the docker image  
-Firsly build the docker image from the `docker-ubuntu` directory  
+## Build the base docker image with Ubuntu and Python  
+Build the docker image from the `docker-ubuntu` directory  
 See the directory README for instructions  
-
-Then
-```
-    sudo docker image build -t gdafund/bybit:0.01 .
-```
-## Run the docker image
-
-Make sure all necessay env variables are defined in s3writer/.env  
-  
-Then execute the following:  
-```
-sudo docker run --env-file s3writer/.env gdafund/bybit:0.01
-```
 
 ## References
 

@@ -4,8 +4,8 @@ RUN mkdir /app
 RUN pip3 install numpy
 RUN pip3 install pandas
 
-COPY bybit/lws-bybit /app
-COPY bybit/example-policy.json /app/policy.json
+COPY lws-bybit /app
+COPY policy.json /app
 COPY s3writer/s3writer.py .
 
 #CMD "/bin/bash"
