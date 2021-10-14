@@ -46,16 +46,6 @@ mutex = Lock()
 
 # Functions
 
-def has_minute_increased(old_ts, new_ts):
-
-    old_min = datetime.utcfromtimestamp(old_ts).strftime('%M')
-    new_min = datetime.utcfromtimestamp(new_ts).strftime('%M')
-
-    if old_min != new_min:
-        return "Flush"
-    else:
-        return "Go"
-
 def s3_bucket_folders(data, _symbol, year, month, day):
     return r'true-alpha/exchange=ByBit/'+data+r'/symbol='+_symbol+'/year='+str(year)+'/month=' + str(month) + '/day=' + str(day) + '/'
 
