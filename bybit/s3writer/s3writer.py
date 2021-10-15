@@ -62,8 +62,8 @@ def verify_feed_frequency (number_of_lines, period):
     if expected_feed > number_of_lines:
         # Allert low feed frequency
         print(f'ERROR: low feed frequency: {number_of_lines}. Expected {expected_feed} for the period of {period} milliseconds')
-    else:
-        print(f'Expected feed frequency: {number_of_lines}. Expected {expected_feed} for the period of {period} milliseconds')
+    # else:
+    #     print(f'Expected feed frequency: {number_of_lines}. Expected {expected_feed} for the period of {period} milliseconds')
 
 def process_raw_line(line):
     global raw_lines
@@ -97,7 +97,7 @@ def flush_thread_function():
         Timer(int(time()/60)*60+60 - time(), flush_thread_function).start ()
 
         utc_timestamp = get_current_timestamp()
-        print(utc_timestamp)
+        # print(utc_timestamp)
 
         year = datetime.utcfromtimestamp(utc_timestamp).strftime('%Y')
         month = datetime.utcfromtimestamp(utc_timestamp).strftime('%m')
@@ -124,45 +124,45 @@ x = Thread(target=flush_thread_function, args=())
 x.start()
 
 if not c_bin_path:
-    print ("The binary path is not specified")
+    print ("ERROR: The binary path is not specified")
     sys.exit()
 
 if not topic:
-    print ("The topic is not specified")
+    print ("ERROR: The topic is not specified")
     sys.exit()
 
 if not bucket_name:
-    print ("The bucket_name is not specified")
+    print ("ERROR: The bucket_name is not specified")
     sys.exit()
 
 if not file_exists(c_bin_path):
-    print (f"File {c_bin_path} does not exist")
+    print (f"ERROR: File {c_bin_path} does not exist")
     sys.exit()
 
 if not access_key_id:
-    print (f"AWS access key is not specified")
+    print (f"ERROR: AWS access key is not specified")
     sys.exit()
 
 if not access_secret_key:
-    print (f"AWS secret key is not specified")
+    print (f"ERROR: AWS secret key is not specified")
     sys.exit()
 
 try:
     os.system(f'{c_bin_path} --topic {topic} &')
 except OSError as oe: 
     if oe.errno != errno.EEXIST:
-        print (f'Failed to start {c_bin_path}')
+        print (f'ERROR: Failed to start {c_bin_path}')
         sys.exit()
 
 try:
     os.mkfifo(FIFO)
 except OSError as oe: 
     if oe.errno != errno.EEXIST:
-        print (f"Failed to create the pipe: {FIFO}")
+        print (f"ERROR: Failed to create the pipe: {FIFO}")
         sys.exit()
 
 with open(FIFO) as fifo:
-    print(f'FIFO {FIFO} opened')
+    # print(f'FIFO {FIFO} opened')
     while True:
         line = readline(fifo)
 
