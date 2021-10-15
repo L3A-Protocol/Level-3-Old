@@ -9,4 +9,4 @@ COPY policy.json /app
 COPY s3writer/*.py ./
 
 #CMD "/bin/bash"
-CMD python3 s3writer.py
+CMD python3 -u s3writer.py
