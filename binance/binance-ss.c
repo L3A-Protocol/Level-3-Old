@@ -139,7 +139,7 @@ binance_state(void *userobj, void *h_src, lws_ss_constate_t state,
 		fifo_descriptor = open(fifo, O_WRONLY);
 		if (fifo_descriptor >= 0) // the fifo is valid
 		{
-			lwsl_user("Pipe %s created",fifo);
+			lwsl_debug("Pipe %s created",fifo);
 		}
 
 		return LWSSSSRET_OK;
@@ -149,7 +149,7 @@ binance_state(void *userobj, void *h_src, lws_ss_constate_t state,
 		{
 			close(fifo_descriptor);
 			fifo_descriptor = -1;
-			lwsl_user("Pipe %s closed",fifo);
+			lwsl_debug("Pipe %s closed",fifo);
 		}
 
 		lws_sul_cancel(&bin->sul_hz);

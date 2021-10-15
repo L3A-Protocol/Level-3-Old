@@ -103,7 +103,7 @@ coinbase_transfer_callback(void *userobj, lws_ss_tx_ordinal_t ord, uint8_t *buf,
 	lws_ss_state_return_t r = LWSSSSRET_OK;
 	coinbase_t *g = bin;
 
-	lwsl_user("coinbase_transfer_callback %s", 	g->msg);
+	lwsl_debug("coinbase_transfer_callback %s", 	g->msg);
 
 	if (g->size == g->pos)
 		return LWSSSSRET_TX_DONT_SEND;
@@ -146,7 +146,7 @@ coinbase_receive_callback(void *userobj, const uint8_t *in, size_t len, int flag
 	// if (!p)
 	// 	return LWSSSSRET_OK;
 
-	// lwsl_user("%s", in);
+	// lwsl_debug("%s", in);
 	if (fifo_descriptor >= 0) // the fifo is valid
 	{
 		write(fifo_descriptor, in, strlen(in));
@@ -174,7 +174,7 @@ coinbase_state(void *userobj, void *h_src, lws_ss_constate_t state,
 		fifo_descriptor = open(fifo, O_WRONLY);
 		if (fifo_descriptor >= 0) // the fifo is valid
 		{
-			lwsl_user("Pipe %s created",fifo);
+			lwsl_debug("Pipe %s created",fifo);
 		}
 		return LWSSSSRET_OK;
 
@@ -183,7 +183,7 @@ coinbase_state(void *userobj, void *h_src, lws_ss_constate_t state,
 		{
 			close(fifo_descriptor);
 			fifo_descriptor = -1;
-			lwsl_user("Pipe %s closed",fifo);
+			lwsl_debug("Pipe %s closed",fifo);
 		}
 
 		lws_sul_cancel(&bin->sul_hz);

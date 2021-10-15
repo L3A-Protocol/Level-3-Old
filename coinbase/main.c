@@ -72,7 +72,7 @@ int main(int argc, const char **argv)
 
 	if (!(topic_cmd = lws_cmdline_option(argc, argv, "--topic")))
 	{
-		lwsl_user("LWS coinbase client topic not specified");
+		lwsl_debug("LWS coinbase client topic not specified");
 		return	-1;
 	}
 
@@ -80,11 +80,11 @@ int main(int argc, const char **argv)
 
 	// if (false == verify_topic(topic))
 	// {
-	// 	lwsl_user("LWS coinbase client invalid topic %s\n", topic);
+	// 	lwsl_debug("LWS coinbase client invalid topic %s\n", topic);
 	// 	return	-1;
 	// }
 
-	lwsl_user("LWS coinbase client for topic: %s\n", topic);
+	lwsl_debug("LWS coinbase client for topic: %s\n", topic);
 	lws_snprintf(fifo, sizeof(fifo),"/tmp/%s",topic);
 
 	info.extensions = extensions;
