@@ -1,6 +1,7 @@
 import os
 import sys
 import errno
+import signal
 from dotenv import load_dotenv
 from osbot_utils.utils.Files import file_exists
 from osbot_utils.utils.Json import str_to_json
@@ -32,11 +33,6 @@ s3 = boto3.resource(
     config=Config(signature_version='s3v4')
 )
 
-def get_current_timestamp():
-    dt = datetime.now(timezone.utc)
-    utc_time = dt.replace(tzinfo=timezone.utc)
-    return utc_time.timestamp()
-
 old_flush_timestamp = 0
 FIFO = f'/tmp/{topic}'
 raw_lines = ''
@@ -44,7 +40,20 @@ number_of_lines = 0
 
 mutex = Lock()
 
+stop_it = False
+
 # Functions
+
+def handler(signum, frame):
+    global stop_it
+    stop_it = True
+    print("Stopping the application. Please allow some time for the theads to finish up gracefully")
+    sys.exit()
+
+def get_current_timestamp():
+    dt = datetime.now(timezone.utc)
+    utc_time = dt.replace(tzinfo=timezone.utc)
+    return utc_time.timestamp()
 
 def s3_bucket_folders(data, _symbol, year, month, day):
     return r'true-alpha/exchange=ByBit/'+data+r'/symbol='+_symbol+'/year='+str(year)+'/month=' + str(month) + '/day=' + str(day) + '/'
@@ -88,9 +97,13 @@ def readline(fifo):
     return line
 
 def flush_thread_function():
+    global stop_it
     global raw_lines
     global number_of_lines
     global old_flush_timestamp
+
+    if stop_it:
+        return
 
     mutex.acquire()
     try:
@@ -121,6 +134,7 @@ def flush_thread_function():
 # Functional code
 
 def main():
+    global stop_it
     global old_flush_timestamp
 
     old_flush_timestamp = get_current_timestamp()
@@ -169,6 +183,9 @@ def main():
     with open(FIFO) as fifo:
         # print(f'FIFO {FIFO} opened')
         while True:
+            if stop_it:
+                sys.exit()
+
             line = readline(fifo)
 
             if not line:
@@ -182,4 +199,5 @@ def main():
                 continue
 
 if __name__ == '__main__':
+    signal.signal(signal.SIGINT, handler)
     main()
