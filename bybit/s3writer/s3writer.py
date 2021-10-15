@@ -167,12 +167,12 @@ with open(FIFO) as fifo:
         line = readline(fifo)
 
         if not line:
-            print("Writer closed")
-            break
+            print("ERROR: no line in FIFO")
+            continue
 
         try:
             process_raw_line(line)
         except Exception as ex:
-            print (f'ERROR in process_raw_line: {ex}')
+            print (f'ERROR: in process_raw_line: {ex}')
             continue
 
