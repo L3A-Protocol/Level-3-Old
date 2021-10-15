@@ -37,7 +37,7 @@ def get_current_timestamp():
     utc_time = dt.replace(tzinfo=timezone.utc)
     return utc_time.timestamp()
 
-old_flush_timestamp = get_current_timestamp()
+old_flush_timestamp = 0
 FIFO = f'/tmp/{topic}'
 raw_lines = ''
 number_of_lines = 0
@@ -120,59 +120,66 @@ def flush_thread_function():
 
 # Functional code
 
-x = Thread(target=flush_thread_function, args=())
-x.start()
+def main():
+    global old_flush_timestamp
 
-if not c_bin_path:
-    print ("ERROR: The binary path is not specified")
-    sys.exit()
+    old_flush_timestamp = get_current_timestamp()
 
-if not topic:
-    print ("ERROR: The topic is not specified")
-    sys.exit()
+    x = Thread(target=flush_thread_function, args=())
+    x.start()
 
-if not bucket_name:
-    print ("ERROR: The bucket_name is not specified")
-    sys.exit()
-
-if not file_exists(c_bin_path):
-    print (f"ERROR: File {c_bin_path} does not exist")
-    sys.exit()
-
-if not access_key_id:
-    print (f"ERROR: AWS access key is not specified")
-    sys.exit()
-
-if not access_secret_key:
-    print (f"ERROR: AWS secret key is not specified")
-    sys.exit()
-
-try:
-    os.system(f'{c_bin_path} --topic {topic} &')
-except OSError as oe: 
-    if oe.errno != errno.EEXIST:
-        print (f'ERROR: Failed to start {c_bin_path}')
+    if not c_bin_path:
+        print ("ERROR: The binary path is not specified")
         sys.exit()
 
-try:
-    os.mkfifo(FIFO)
-except OSError as oe: 
-    if oe.errno != errno.EEXIST:
-        print (f"ERROR: Failed to create the pipe: {FIFO}")
+    if not topic:
+        print ("ERROR: The topic is not specified")
         sys.exit()
 
-with open(FIFO) as fifo:
-    # print(f'FIFO {FIFO} opened')
-    while True:
-        line = readline(fifo)
+    if not bucket_name:
+        print ("ERROR: The bucket_name is not specified")
+        sys.exit()
 
-        if not line:
-            print("ERROR: no line in FIFO")
-            continue
+    if not file_exists(c_bin_path):
+        print (f"ERROR: File {c_bin_path} does not exist")
+        sys.exit()
 
-        try:
-            process_raw_line(line)
-        except Exception as ex:
-            print (f'ERROR: in process_raw_line: {ex}')
-            continue
+    if not access_key_id:
+        print (f"ERROR: AWS access key is not specified")
+        sys.exit()
 
+    if not access_secret_key:
+        print (f"ERROR: AWS secret key is not specified")
+        sys.exit()
+
+    try:
+        os.system(f'{c_bin_path} --topic {topic} &')
+    except OSError as oe:
+        if oe.errno != errno.EEXIST:
+            print (f'ERROR: Failed to start {c_bin_path}')
+            sys.exit()
+
+    try:
+        os.mkfifo(FIFO)
+    except OSError as oe:
+        if oe.errno != errno.EEXIST:
+            print (f"ERROR: Failed to create the pipe: {FIFO}")
+            sys.exit()
+
+    with open(FIFO) as fifo:
+        # print(f'FIFO {FIFO} opened')
+        while True:
+            line = readline(fifo)
+
+            if not line:
+                print("ERROR: no line in FIFO")
+                continue
+
+            try:
+                process_raw_line(line)
+            except Exception as ex:
+                print (f'ERROR: in process_raw_line: {ex}')
+                continue
+
+if __name__ == '__main__':
+    main()
