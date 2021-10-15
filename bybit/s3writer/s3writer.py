@@ -15,6 +15,8 @@ from botocore.client import Config
 from threading import Timer, Thread, Lock
 from time import time
 
+from log_json import log_json
+
 # Variables
 
 load_dotenv(override=True)
@@ -37,10 +39,9 @@ old_flush_timestamp = 0
 FIFO = f'/tmp/{topic}'
 raw_lines = ''
 number_of_lines = 0
-
 mutex = Lock()
-
 stop_it = False
+log = log_json()
 
 # Functions
 
@@ -63,16 +64,16 @@ def s3_bucket_raw_data_folders(topic, year, month, day):
 
 def verify_feed_frequency (number_of_lines, period):
     global feed_interval
+    log = log_json()
+
     expected_feed = math.floor(period / feed_interval)
 
-    log_line = {"period":period,"lines_read":number_of_lines,"expected":expected_feed}
-    print(log_line)
+    details = {"details":{"period":period,"lines_read":number_of_lines,"expected":expected_feed}}
+    log.create("INFO","Latest feed frequency", details)
 
     if expected_feed > number_of_lines:
         # Allert low feed frequency
-        print(f'ERROR: low feed frequency: {number_of_lines}. Expected {expected_feed} for the period of {period} milliseconds')
-    # else:
-    #     print(f'Expected feed frequency: {number_of_lines}. Expected {expected_feed} for the period of {period} milliseconds')
+        log.create("ERROR", 'Low feed frequency', details)
 
 def process_raw_line(line):
     global raw_lines
@@ -110,7 +111,6 @@ def flush_thread_function():
         Timer(int(time()/60)*60+60 - time(), flush_thread_function).start ()
 
         utc_timestamp = get_current_timestamp()
-        # print(utc_timestamp)
 
         year = datetime.utcfromtimestamp(utc_timestamp).strftime('%Y')
         month = datetime.utcfromtimestamp(utc_timestamp).strftime('%m')
@@ -136,6 +136,7 @@ def flush_thread_function():
 def main():
     global stop_it
     global old_flush_timestamp
+    log = log_json()
 
     old_flush_timestamp = get_current_timestamp()
 
@@ -143,45 +144,44 @@ def main():
     x.start()
 
     if not c_bin_path:
-        print ("ERROR: The binary path is not specified")
+        log.create("ERROR", "The binary path is not specified")
         sys.exit()
 
     if not topic:
-        print ("ERROR: The topic is not specified")
+        log.create ("ERROR", "The topic is not specified")
         sys.exit()
 
     if not bucket_name:
-        print ("ERROR: The bucket_name is not specified")
+        log.create ("ERROR" "The bucket_name is not specified")
         sys.exit()
 
     if not file_exists(c_bin_path):
-        print (f"ERROR: File {c_bin_path} does not exist")
+        log.create ("ERROR", f"File {c_bin_path} does not exist")
         sys.exit()
 
     if not access_key_id:
-        print (f"ERROR: AWS access key is not specified")
+        log.create ("ERROR", "AWS access key is not specified")
         sys.exit()
 
     if not access_secret_key:
-        print (f"ERROR: AWS secret key is not specified")
+        log.create ("ERROR", "AWS secret key is not specified")
         sys.exit()
 
     try:
         os.system(f'{c_bin_path} --topic {topic} &')
     except OSError as oe:
         if oe.errno != errno.EEXIST:
-            print (f'ERROR: Failed to start {c_bin_path}')
+            log.create ('ERROR', f'Failed to start {c_bin_path}')
             sys.exit()
 
     try:
         os.mkfifo(FIFO)
     except OSError as oe:
         if oe.errno != errno.EEXIST:
-            print (f"ERROR: Failed to create the pipe: {FIFO}")
+            log.create ("ERROR", f"Failed to create the pipe: {FIFO}")
             sys.exit()
 
     with open(FIFO) as fifo:
-        # print(f'FIFO {FIFO} opened')
         while True:
             if stop_it:
                 sys.exit()
@@ -189,13 +189,13 @@ def main():
             line = readline(fifo)
 
             if not line:
-                print("ERROR: no line in FIFO")
+                log.create("ERROR", "No line in FIFO")
                 continue
 
             try:
                 process_raw_line(line)
             except Exception as ex:
-                print (f'ERROR: in process_raw_line: {ex}')
+                log.create ('ERROR', f'process_raw_line: {ex}')
                 continue
 
 if __name__ == '__main__':
