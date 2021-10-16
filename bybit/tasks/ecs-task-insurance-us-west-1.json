@@ -4,20 +4,24 @@
     ],
     "containerDefinitions": [
         {
-            "name": "bybit-orderBook_200.100ms.BTCUSD",
-            "image": "381452754685.dkr.ecr.eu-west-1.amazonaws.com/bybit",
+            "name": "bybit-insurance-us-west-1",
+            "image": "381452754685.dkr.ecr.us-west-1.amazonaws.com/bybit03",
             "memoryReservation": "128",
             "resourceRequirements": null,
             "essential": true,
             "portMappings": [],
             "environment": [
                 {
+                    "name": "EXCHANGE",
+                    "value": "ByBit"
+                },
+                {
                     "name": "C_BINARY_PATH",
                     "value": "/app/lws-bybit"
                 },
                 {
                     "name": "TOPIC",
-                    "value": "klineV2.1.BTCUSD"
+                    "value": "insurance"
                 },
                 {
                     "name": "AWS_ACCESS_KEY_ID",
@@ -29,7 +33,7 @@
                 },
                 {
                     "name": "BUCKET_NAME",
-                    "value": "gda-data-bucket"
+                    "value": "gda-data-lake-us-west-1"
                 }
             ],
             "environmentFiles": [],
@@ -43,7 +47,7 @@
             "logConfiguration": {
                 "logDriver": "awslogs",
                 "options": {
-                    "awslogs-group": "/ecs/bybit-orderBook_200.100ms.BTCUSD",
+                    "awslogs-group": "/ecs/bybit-insurance-us-west-1",
                     "awslogs-region": "us-west-1",
                     "awslogs-stream-prefix": "ecs"
                 }
@@ -61,7 +65,7 @@
     "memory": "512",
     "cpu": "256",
     "executionRoleArn": "arn:aws:iam::381452754685:role/ecsTaskExecutionRole",
-    "family": "bybit-orderBook_200.100ms.BTCUSD",
+    "family": "bybit-insurance-us-west-1",
     "taskRoleArn": "",
     "tags": []
 }
