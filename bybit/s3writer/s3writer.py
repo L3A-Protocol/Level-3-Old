@@ -36,12 +36,10 @@ s3 = boto3.resource(
 )
 
 old_flush_timestamp = 0
-FIFO = f'/tmp/{topic}'
 raw_lines = ''
 number_of_lines = 0
 mutex = Lock()
 stop_it = False
-log = log_json()
 
 # Functions
 
@@ -174,6 +172,7 @@ def main():
             log.create ('ERROR', f'Failed to start {c_bin_path}')
             sys.exit()
 
+    FIFO = f'/tmp/{topic}'
     try:
         os.mkfifo(FIFO)
     except OSError as oe:
