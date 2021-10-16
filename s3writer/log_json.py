@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 
-c_bin_path  = os.getenv("C_BINARY_PATH", 'none')
+exchange    = os.getenv("EXCHANGE", 'none')
 topic       = os.getenv("TOPIC", 'none')
 
 class log_json(object):
@@ -10,7 +10,7 @@ class log_json(object):
 
         log = {'metadata':
                 {
-                    'binary':   c_bin_path,
+                    'exchange': exchange,
                     'topic':    topic
                 },
                 'type':     type,

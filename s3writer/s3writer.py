@@ -20,6 +20,7 @@ from log_json import log_json
 # Variables
 
 load_dotenv(override=True)
+exchange    = os.getenv("EXCHANGE", None)
 c_bin_path  = os.getenv("C_BINARY_PATH", None)
 topic       = os.getenv("TOPIC", None)
 bucket_name = os.getenv("BUCKET_NAME", None)
@@ -55,10 +56,10 @@ def get_current_timestamp():
     return utc_time.timestamp()
 
 def s3_bucket_folders(data, _symbol, year, month, day):
-    return r'true-alpha/exchange=ByBit/'+data+r'/symbol='+_symbol+'/year='+str(year)+'/month=' + str(month) + '/day=' + str(day) + '/'
+    return f'true-alpha/exchange={exchange}/{data}/symbol={_symbol}/year={str(year)}/month={str(month)}/day={str(day)}/'
 
 def s3_bucket_raw_data_folders(topic, year, month, day):
-    return r'raw-data/exchange=ByBit/'+topic+r'/year='+str(year)+'/month=' + str(month) + '/day=' + str(day) + '/'
+    return f'raw-data/exchange={exchange}/{topic}/year={str(year)}/month={str(month)}/day={str(day)}/'
 
 def verify_feed_frequency (timestamp, number_of_lines, period):
     global feed_interval
@@ -148,6 +149,10 @@ def main():
 
     x = Thread(target=flush_thread_function, args=())
     x.start()
+
+    if not exchange:
+        log.create("ERROR", "The exchange is not specified")
+        sys.exit()
 
     if not c_bin_path:
         log.create("ERROR", "The binary path is not specified")

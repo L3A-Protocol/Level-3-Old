@@ -23,14 +23,17 @@ Option|Meaning
 ## Build and Run the docker image
 
 ```
-    $ ./build-docker-image.sh 
+    $ ./build-docker-image.sh -v <version>
 ```
+
+where <version> usually contains major and minor version nubmers.  
+For instance it may be `0.01`. Here major version is `0` and minor is `01`
 
 Make sure all necessay env variables are defined in the `.env` file.
 See `s3writer\.env.sample`
   
 Then execute the following:  
 ```
-    sudo docker run --env-file .env gdafund/bybit:0.01
+    sudo docker run --env-file .env gdafund/bybit:<version>
 ```
 
