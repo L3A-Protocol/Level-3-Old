@@ -6,7 +6,7 @@ RUN pip3 install pandas
 
 COPY lws-bybit /app
 COPY policy.json /app
-COPY s3writer/*.py ./
+COPY *.py ./
 
 #CMD "/bin/bash"
 CMD python3 -u s3writer.py

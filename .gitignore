@@ -53,14 +53,15 @@ dkms.conf
 
 ws-echo/*
 
+s3writer/__pycache__/*
+s3writer/.env
+
 bybit/CMakeFiles/*
 bybit/CMakeCache.txt
 bybit/Makefile
 bybit/cmake_install.cmake
 bybit/lws-bybit
-
-bybit/s3writer/__pycache__/*
-bybit/s3writer/.env
+bybit/.env
 
 coinbase/CMakeFiles/*
 coinbase/CMakeCache.txt

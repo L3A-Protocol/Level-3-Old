@@ -23,13 +23,14 @@ Option|Meaning
 ## Build and Run the docker image
 
 ```
-    sudo docker image build -t gdafund/bybit:0.01 .
+    $ ./build-docker-image.sh 
 ```
 
-Make sure all necessay env variables are defined in s3writer/.env  
+Make sure all necessay env variables are defined in the `.env` file.
+See `s3writer\.env.sample`
   
 Then execute the following:  
 ```
-    sudo docker run --env-file s3writer/.env gdafund/bybit:0.01
+    sudo docker run --env-file .env gdafund/bybit:0.01
 ```
 
