@@ -60,13 +60,21 @@ def s3_bucket_folders(data, _symbol, year, month, day):
 def s3_bucket_raw_data_folders(topic, year, month, day):
     return r'raw-data/exchange=ByBit/'+topic+r'/year='+str(year)+'/month=' + str(month) + '/day=' + str(day) + '/'
 
-def verify_feed_frequency (number_of_lines, period):
+def verify_feed_frequency (timestamp, number_of_lines, period):
     global feed_interval
     log = log_json()
 
     expected_feed = math.floor(period / feed_interval)
 
-    details = {"details":{"period":period,"lines_read":number_of_lines,"expected":expected_feed}}
+    details = {"details":
+                {
+                    "timestamp":    timestamp,
+                    "period":       period,
+                    "lines_read":   number_of_lines,
+                    "expected":     expected_feed
+                }
+            }
+
     log.create("INFO","Latest feed frequency", details)
 
     if expected_feed > number_of_lines:
@@ -121,7 +129,7 @@ def flush_thread_function():
             s3.Bucket(bucket_name).put_object(Key=f'{folders}{seq}', Body=raw_lines)
 
         period = math.floor((utc_timestamp - old_flush_timestamp) * 1000)
-        verify_feed_frequency(number_of_lines, period)
+        verify_feed_frequency(seq, number_of_lines, period)
         old_flush_timestamp = utc_timestamp
 
         raw_lines = ''
