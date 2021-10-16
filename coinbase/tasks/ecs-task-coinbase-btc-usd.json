@@ -5,12 +5,16 @@
     "containerDefinitions": [
         {
             "name": "coinbase-btc-usd",
-            "image": "381452754685.dkr.ecr.eu-west-1.amazonaws.com/coinbase",
+            "image": "381452754685.dkr.ecr.us-west-1.amazonaws.com/coinbase02",
             "memoryReservation": "128",
             "resourceRequirements": null,
             "essential": true,
             "portMappings": [],
             "environment": [
+                {
+                    "name": "EXCHANGE",
+                    "value": "Coinbase"
+                },
                 {
                     "name": "C_BINARY_PATH",
                     "value": "/app/lws-coinbase"
@@ -29,7 +33,7 @@
                 },
                 {
                     "name": "BUCKET_NAME",
-                    "value": "gda-data-bucket"
+                    "value": "gda-data-lake-us-west-1"
                 }
             ],
             "environmentFiles": [],
@@ -43,54 +47,7 @@
             "logConfiguration": {
                 "logDriver": "awslogs",
                 "options": {
-                    "awslogs-group": "/ecs/coinbase-bts-usd",
-                    "awslogs-region": "eu-central-1",
-                    "awslogs-stream-prefix": "ecs"
-                }
-            },
-            "ulimits": null,
-            "dockerLabels": null,
-            "dependsOn": null,
-            "repositoryCredentials": {
-                "credentialsParameter": ""
-            }
-        }
-    ],
-    "volumes": [],
-    "networkMode": "awsvpc",
-    "memory": "512",
-    "cpu": "256",
-    "executionRoleArn": "arn:aws:iam::381452754685:role/ecsTaskExecutionRole",
-    "family": "coinbase-bts-usd",
-    "taskRoleArn": "",
-    "tags": []
-}
-
-
-{
-    "requiresCompatibilities": [
-        "FARGATE"
-    ],
-    "containerDefinitions": [
-        {
-            "name": "bybit-orderBook_200.100ms.BTCUSD",
-            "image": "381452754685.dkr.ecr.eu-west-1.amazonaws.com/bybit",
-            "memoryReservation": "128",
-            "resourceRequirements": null,
-            "essential": true,
-            "portMappings": [],
-            "environmentFiles": [],
-            "secrets": null,
-            "mountPoints": null,
-            "volumesFrom": null,
-            "hostname": null,
-            "user": null,
-            "workingDirectory": null,
-            "extraHosts": null,
-            "logConfiguration": {
-                "logDriver": "awslogs",
-                "options": {
-                    "awslogs-group": "/ecs/bybit-orderBook_200.100ms.BTCUSD",
+                    "awslogs-group": "/ecs/coinbase-btc-usd",
                     "awslogs-region": "us-west-1",
                     "awslogs-stream-prefix": "ecs"
                 }
@@ -108,7 +65,7 @@
     "memory": "512",
     "cpu": "256",
     "executionRoleArn": "arn:aws:iam::381452754685:role/ecsTaskExecutionRole",
-    "family": "bybit-orderBook_200.100ms.BTCUSD",
+    "family": "coinbase-btc-usd",
     "taskRoleArn": "",
     "tags": []
 }
