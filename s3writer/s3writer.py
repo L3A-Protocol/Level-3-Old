@@ -80,7 +80,7 @@ def verify_feed_frequency (timestamp, number_of_lines, period):
 
     if expected_feed > number_of_lines:
         # Allert low feed frequency
-        log.create("ERROR", 'Low feed frequency', details)
+        log.create("ERROR", 'Low feed frequency')
 
 def process_raw_line(line):
     global raw_lines

@@ -19,15 +19,13 @@ class log_json(object):
                 "message":  message
             }
 
-        if not body:
-            print (json_to_str(log))
-            return
+        if body:
+            try:
+                log.update(body)          
+            finally:
+                pass
 
-        try:
-            log.update(body)
-            print(json_to_str(log))
-        finally:
-            pass
+        print (json_to_str(log, indent=0).replace('\n',''))
 
 if __name__ == '__main__':
     log = log_json()
