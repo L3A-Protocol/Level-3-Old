@@ -1,5 +1,7 @@
 import os
 from dotenv import load_dotenv
+from osbot_utils.utils.Json import str_to_json, json_to_str, json_parse
+
 
 exchange    = os.getenv("EXCHANGE", 'none')
 topic       = os.getenv("TOPIC", 'none')
@@ -18,12 +20,12 @@ class log_json(object):
             }
 
         if not body:
-            print (log)
+            print (json_to_str(log))
             return
 
         try:
             log.update(body)
-            print(log)
+            print(json_to_str(log))
         finally:
             pass
 
