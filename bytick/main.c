@@ -12,12 +12,12 @@
  *
  * Build lws with -DLWS_WITH_SECURE_STREAMS=1 -DLWS_WITHOUT_EXTENSIONS=0
  *
- * "example-policy.json" contains all the information about endpoints, protocols
+ * "bytick-policy.json" contains all the information about endpoints, protocols
  * and connection validation, tagged by streamtype name.
  *
  * The example tries to load it from the cwd, it lives
  * in ./minimal-examples/client/binance dir, so either run it from there, or
- * copy the example-policy.json to your cwd.  It's also possible to put the
+ * copy the bytick-policy.json to your cwd.  It's also possible to put the
  * policy json in the code as a string and pass that at context creation time.
  *
  * When built to use the SSPC proxy, the local policy is not used since the
@@ -67,7 +67,7 @@ int main(int argc, const char **argv)
 	// lws_set_log_level(LLL_EXT, NULL);
 	struct lws_context_creation_info info;
 
-	lws_context_info_defaults(&info, "/app/policy.json");
+	lws_context_info_defaults(&info, "/app/bytick-policy.json");
 	lws_cmdline_option_handle_builtin(argc, argv, &info);
 	signal(SIGINT, sigint_handler);
 

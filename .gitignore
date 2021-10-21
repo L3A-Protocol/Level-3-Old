@@ -63,6 +63,13 @@ bybit/cmake_install.cmake
 bybit/lws-bybit
 bybit/.env
 
+bytick/CMakeFiles/*
+bytick/CMakeCache.txt
+bytick/Makefile
+bytick/cmake_install.cmake
+bytick/lws-bytick
+bytick/.env
+
 coinbase/CMakeFiles/*
 coinbase/CMakeCache.txt
 coinbase/Makefile

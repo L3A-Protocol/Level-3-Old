@@ -12,12 +12,12 @@
  *
  * Build lws with -DLWS_WITH_SECURE_STREAMS=1 -DLWS_WITHOUT_EXTENSIONS=0
  *
- * "policy.json" contains all the information about endpoints, protocols and
+ * "bytick-policy.json" contains all the information about endpoints, protocols and
  * connection validation, tagged by streamtype name.
  *
  * The example tries to load it from the cwd, it lives
  * in ./minimal-examples/secure-streams/minimal-secure-streams-binance dir, so
- * either run it from there, or copy the policy.json to your cwd.  It's also
+ * either run it from there, or copy the bytick-policy.json to your cwd.  It's also
  * possible to put the policy json in the code as a string and pass that at
  * context creation time.
  */

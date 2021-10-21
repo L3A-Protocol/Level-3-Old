@@ -5,7 +5,7 @@ RUN pip3 install numpy
 RUN pip3 install pandas
 
 COPY lws-bytick /app
-COPY policy.json /app
+COPY bytick-policy.json /app
 COPY *.py ./
 
 #CMD "/bin/bash"

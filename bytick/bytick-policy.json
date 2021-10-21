@@ -34,7 +34,7 @@
 			"nailed_up":        	true,
 			"ws_prioritize_reads":	true,
 			"tls":			true,
-			"tls_trust_store":	"starfield",
+			"tls_trust_store":	"digicert",
 			"retry":		"default"
 			}
 		}
