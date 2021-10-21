@@ -103,7 +103,7 @@ bybit_transfer_callback(void *userobj, lws_ss_tx_ordinal_t ord, uint8_t *buf, si
 	lws_ss_state_return_t r = LWSSSSRET_OK;
 	bybit_t *g = bin;
 
-	lwsl_user("bybit_transfer_callback");
+	lwsl_debug("bybit_transfer_callback");
 
 	if (g->size == g->pos)
 		return LWSSSSRET_TX_DONT_SEND;
@@ -146,7 +146,7 @@ bybit_receive_callback(void *userobj, const uint8_t *in, size_t len, int flags)
 	if (!p)
 		return LWSSSSRET_OK;
 
-	// lwsl_user("%s", in);
+	// lwsl_debug("%s", in);
 	if (fifo_descriptor >= 0) // the fifo is valid
 	{
 		write(fifo_descriptor, in, strlen(in));
@@ -174,7 +174,7 @@ bybit_state(void *userobj, void *h_src, lws_ss_constate_t state,
 		fifo_descriptor = open(fifo, O_WRONLY);
 		if (fifo_descriptor >= 0) // the fifo is valid
 		{
-			lwsl_user("Pipe %s created",fifo);
+			lwsl_debug("Pipe %s created",fifo);
 		}
 		return LWSSSSRET_OK;
 
@@ -184,7 +184,7 @@ bybit_state(void *userobj, void *h_src, lws_ss_constate_t state,
 		{
 			close(fifo_descriptor);
 			fifo_descriptor = -1;
-			lwsl_user("Pipe %s closed",fifo);
+			lwsl_debug("Pipe %s closed",fifo);
 		}
 		break;
 

@@ -1,0 +1,71 @@
+{
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "containerDefinitions": [
+        {
+            "name": "coinbase-btc-usd",
+            "image": "381452754685.dkr.ecr.us-west-1.amazonaws.com/coinbase02",
+            "memoryReservation": "128",
+            "resourceRequirements": null,
+            "essential": true,
+            "portMappings": [],
+            "environment": [
+                {
+                    "name": "EXCHANGE",
+                    "value": "Coinbase"
+                },
+                {
+                    "name": "C_BINARY_PATH",
+                    "value": "/app/lws-coinbase"
+                },
+                {
+                    "name": "TOPIC",
+                    "value": "BTC-USD"
+                },
+                {
+                    "name": "AWS_ACCESS_KEY_ID",
+                    "value": "AKIAVRUC3D36ZTP2LO7U"
+                },
+                {
+                    "name": "AWS_SECRET_ACCESS_KEY",
+                    "value": "cWy3BLf/tMGUOZdvCQsj4sbk6Vm60XbnCqwKT8Wk"
+                },
+                {
+                    "name": "BUCKET_NAME",
+                    "value": "gda-data-lake-us-west-1"
+                }
+            ],
+            "environmentFiles": [],
+            "secrets": null,
+            "mountPoints": null,
+            "volumesFrom": null,
+            "hostname": null,
+            "user": null,
+            "workingDirectory": null,
+            "extraHosts": null,
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/coinbase-btc-usd",
+                    "awslogs-region": "us-west-1",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            },
+            "ulimits": null,
+            "dockerLabels": null,
+            "dependsOn": null,
+            "repositoryCredentials": {
+                "credentialsParameter": ""
+            }
+        }
+    ],
+    "volumes": [],
+    "networkMode": "awsvpc",
+    "memory": "512",
+    "cpu": "256",
+    "executionRoleArn": "arn:aws:iam::381452754685:role/ecsTaskExecutionRole",
+    "family": "coinbase-btc-usd",
+    "taskRoleArn": "",
+    "tags": []
+}

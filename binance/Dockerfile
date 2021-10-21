@@ -4,7 +4,7 @@ RUN mkdir /app
 
 COPY lws-binance /app
 COPY binance-policy.json /app
-COPY s3writer/s3writer.py .
+COPY *.py ./
 
 #CMD "/bin/bash"
-CMD python3 s3writer.py
+CMD python3 -u s3writer.py

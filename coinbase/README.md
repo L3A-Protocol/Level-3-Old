@@ -26,21 +26,23 @@ Option|Meaning
     sudo docker image build -t gdafund/coinbase:0.01 .
 ```
 
-## Run the container
-
-Create .env file  
+## Build and Run the docker image
 
 ```
-    cp s3writer/.env.sample .env
+    $ ./build-docker-image.sh -v <version>
 ```
+
+where <version> usually contains major and minor version nubmers.  
+For instance it may be `0.01`. Here major version is `0` and minor is `01`
+
+Make sure all necessay env variables are defined in the `.env` file.
+See `s3writer\.env.sample`
   
-Replace the values in `.env` with the correct ones  
-  
-Run the container  
-  
+Then execute the following:  
 ```
-    sudo docker run --env-file s3writer/.env gdafund/coinbase:0.01
+    sudo docker run --env-file .env gdafund/coinbase:<version>
 ```
+
 
 ## Running ECS Fargate task with the container image
   

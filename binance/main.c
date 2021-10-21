@@ -58,7 +58,7 @@ int main(int argc, const char **argv)
 	lws_cmdline_option_handle_builtin(argc, argv, &info);
 	signal(SIGINT, sigint_handler);
 
-	lwsl_user("LWS binance client\n");
+	lwsl_debug("LWS binance client\n");
 
 	lws_snprintf(fifo, sizeof(fifo),"/tmp/binance");
 
