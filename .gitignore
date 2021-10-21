@@ -62,6 +62,7 @@ bybit/Makefile
 bybit/cmake_install.cmake
 bybit/lws-bybit
 bybit/.env
+bybit/.env-usdt
 
 bytick/CMakeFiles/*
 bytick/CMakeCache.txt
