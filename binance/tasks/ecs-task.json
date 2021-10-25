@@ -30,7 +30,6 @@
                 {
                     "name": "AWS_SECRET_ACCESS_KEY",
                     "value": "****************************************"
-
                 },
                 {
                     "name": "BUCKET_NAME",
