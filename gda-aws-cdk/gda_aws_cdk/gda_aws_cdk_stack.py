@@ -6,6 +6,7 @@ from aws_cdk import core as cdk
 # being updated to use `cdk`.  You may delete this import if you don't need it.
 from aws_cdk import core
 
+from aws_cdk import aws_s3 as s3
 
 class GdaAwsCdkStack(cdk.Stack):
 
@@ -13,3 +14,7 @@ class GdaAwsCdkStack(cdk.Stack):
         super().__init__(scope, construct_id, **kwargs)
 
         # The code that defines your stack goes here
+
+        bucket = s3.Bucket(self,
+            "gda-data-lake",
+            versioned=True,)
