@@ -21,7 +21,7 @@ class GdaAwsCdkStack(cdk.Stack):
             removal_policy=cdk.RemovalPolicy.DESTROY,
             auto_delete_objects=True)
 
-        vpc = ec2.Vpc(self, "GDADataLakeVpc", max_azs=3)     # default is all AZs in region
+        vpc = ec2.Vpc(self, "GDADataLakeVpc", max_azs=3, auto_delete_objects=True)
 
         cluster = ecs.Cluster(self, "GDADataLakeCluster", vpc=vpc)
 
