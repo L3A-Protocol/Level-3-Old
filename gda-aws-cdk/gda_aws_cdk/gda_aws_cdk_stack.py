@@ -38,7 +38,15 @@ class GdaAwsCdkStack(cdk.Stack):
         binance_repo = ecr.Repository.from_repository_arn(self, "binance-repo", "arn:aws:ecr:us-west-1:381452754685:repository/binance03")
 
         image = ecs.ContainerImage.from_ecr_repository(binance_repo)
-        container = task_definition.add_container( "binance-container", image=image)
+        environment = {
+                    "EXCHANGE": "Binance",
+                    "C_BINARY_PATH":"/app/lws-binance",
+                    "TOPIC": "binance",
+                    "AWS_ACCESS_KEY_ID": "AKIAVRUC3D36ZTP2LO7U",
+                    "AWS_SECRET_ACCESS_KEY": "****************************************",
+                    "BUCKET_NAME": "gda-data-lake-us-west-1"
+                }
+        container = task_definition.add_container( "binance-container", image=image, environment=environment)
 
         # port_mapping = ecs.PortMapping(container_port=8080, host_port=8080)
         # container.add_port_mappings(port_mapping)
