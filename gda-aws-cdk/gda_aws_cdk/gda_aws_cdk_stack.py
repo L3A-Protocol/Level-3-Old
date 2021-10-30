@@ -2,6 +2,7 @@
 # the CDK's core module.  The following line also imports it as `core` for use
 # with examples from the CDK Developer's Guide, which are in the process of
 # being updated to use `cdk`.  You may delete this import if you don't need it.
+import os
 
 from aws_cdk import (core as cdk,
                      aws_s3 as s3,
@@ -25,26 +26,20 @@ class GdaAwsCdkStack(cdk.Stack):
 
         cluster = ecs.Cluster(self, "GDADataLakeCluster", vpc=vpc)
 
-        # task_definition = ecs.FargateTaskDefinition.from_fargate_task_definition_arn(self, "binance-task",
-        #     "arn:aws:ecs:us-west-1:381452754685:task-definition/binance-us-west-1:4")
-
-        # binance_service = ecs.FargateService(self, "binance-service",
-        #     task_definition=task_definition,
-        #     assign_public_ip=True,
-        #     cluster=cluster)
-
         task_definition = ecs.FargateTaskDefinition( self, "binance-td",
                 cpu=256, memory_limit_mib=512)
 
         binance_repo = ecr.Repository.from_repository_arn(self, "binance-repo", "arn:aws:ecr:us-west-1:381452754685:repository/binance03")
 
         image = ecs.ContainerImage.from_ecr_repository(binance_repo)
+        access_key_id       = os.environ["EXCHANGE_ACCESS_KEY_ID"]
+        access_secret_key   = os.environ["EXCHANGE_SECRET_ACCESS_KEY"]
         environment = {
                     "EXCHANGE": "Binance",
                     "C_BINARY_PATH":"/app/lws-binance",
                     "TOPIC": "binance",
-                    "AWS_ACCESS_KEY_ID": "AKIAVRUC3D36ZTP2LO7U",
-                    "AWS_SECRET_ACCESS_KEY": "****************************************",
+                    "AWS_ACCESS_KEY_ID": access_key_id,
+                    "AWS_SECRET_ACCESS_KEY": access_secret_key,
                     "BUCKET_NAME": "gda-data-lake-us-west-1"
                 }
         logDetail = logs.LogGroup(self, "BinanceServicesLogGroup", log_group_name="/ecs/binance-log-group", retention=logs.RetentionDays.SIX_MONTHS, removal_policy=cdk.RemovalPolicy.DESTROY)
@@ -56,3 +51,8 @@ class GdaAwsCdkStack(cdk.Stack):
 
         # port_mapping = ecs.PortMapping(container_port=8080, host_port=8080)
         # container.add_port_mappings(port_mapping)
+
+        # binance_service = ecs.FargateService(self, "binance-service",
+        #     task_definition=task_definition,
+        #     assign_public_ip=True,
+        #     cluster=cluster)
