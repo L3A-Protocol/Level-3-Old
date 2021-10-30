@@ -52,7 +52,7 @@ class GdaAwsCdkStack(cdk.Stack):
         # port_mapping = ecs.PortMapping(container_port=8080, host_port=8080)
         # container.add_port_mappings(port_mapping)
 
-        # binance_service = ecs.FargateService(self, "binance-service",
-        #     task_definition=task_definition,
-        #     assign_public_ip=True,
-        #     cluster=cluster)
+        binance_service = ecs.FargateService(self, "binance-service",
+            task_definition=task_definition,
+            assign_public_ip=True,
+            cluster=cluster)
