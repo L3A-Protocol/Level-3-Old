@@ -40,7 +40,7 @@ class GdaAwsCdkStack(cdk.Stack):
                     "TOPIC": "binance",
                     "AWS_ACCESS_KEY_ID": access_key_id,
                     "AWS_SECRET_ACCESS_KEY": access_secret_key,
-                    "BUCKET_NAME": "gda-data-lake-us-west-1"
+                    "BUCKET_NAME": bucket.bucket_name
                 }
         logDetail = logs.LogGroup(self, "BinanceServicesLogGroup", log_group_name="/ecs/binance-log-group", retention=logs.RetentionDays.SIX_MONTHS, removal_policy=cdk.RemovalPolicy.DESTROY)
         logging = ecs.LogDriver.aws_logs(stream_prefix = "ecs", log_group=logDetail)
