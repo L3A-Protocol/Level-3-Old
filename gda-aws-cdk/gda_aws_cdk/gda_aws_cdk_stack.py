@@ -7,6 +7,7 @@ from aws_cdk import (core as cdk,
                      aws_s3 as s3,
                      aws_ec2 as ec2,
                      aws_ecs as ecs,
+                     aws_ecr as ecr,
                      aws_ecs_patterns as ecs_patterns)
 
 class GdaAwsCdkStack(cdk.Stack):
@@ -23,5 +24,21 @@ class GdaAwsCdkStack(cdk.Stack):
 
         cluster = ecs.Cluster(self, "GDADataLakeCluster", vpc=vpc)
 
-        task_definition = ecs.FargateTaskDefinition.from_fargate_task_definition_arn(self, "binance-task",
-            "arn:aws:ecs:us-west-1:381452754685:task-definition/binance-us-west-1:4")
+        # task_definition = ecs.FargateTaskDefinition.from_fargate_task_definition_arn(self, "binance-task",
+        #     "arn:aws:ecs:us-west-1:381452754685:task-definition/binance-us-west-1:4")
+
+        # binance_service = ecs.FargateService(self, "binance-service",
+        #     task_definition=task_definition,
+        #     assign_public_ip=True,
+        #     cluster=cluster)
+
+        task_definition = ecs.FargateTaskDefinition( self, "binance-td",
+                cpu=256, memory_limit_mib=512)
+
+        binance_repo = ecr.Repository.from_repository_arn(self, "binance-repo", "arn:aws:ecr:us-west-1:381452754685:repository/binance03")
+
+        image = ecs.ContainerImage.from_ecr_repository(binance_repo)
+        container = task_definition.add_container( "binance-container", image=image)
+
+        # port_mapping = ecs.PortMapping(container_port=8080, host_port=8080)
+        # container.add_port_mappings(port_mapping)
