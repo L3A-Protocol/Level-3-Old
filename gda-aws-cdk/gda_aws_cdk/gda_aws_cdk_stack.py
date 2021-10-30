@@ -22,3 +22,6 @@ class GdaAwsCdkStack(cdk.Stack):
         vpc = ec2.Vpc(self, "GDADataLakeVpc", max_azs=3)     # default is all AZs in region
 
         cluster = ecs.Cluster(self, "GDADataLakeCluster", vpc=vpc)
+
+        task_definition = ecs.FargateTaskDefinition.from_fargate_task_definition_arn(self, "binance-task",
+            "arn:aws:ecs:us-west-1:381452754685:task-definition/binance-us-west-1:4")
