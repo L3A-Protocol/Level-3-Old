@@ -8,6 +8,7 @@ from aws_cdk import (core as cdk,
                      aws_ec2 as ec2,
                      aws_ecs as ecs,
                      aws_ecr as ecr,
+                     aws_logs as logs,
                      aws_ecs_patterns as ecs_patterns)
 
 class GdaAwsCdkStack(cdk.Stack):
@@ -46,7 +47,12 @@ class GdaAwsCdkStack(cdk.Stack):
                     "AWS_SECRET_ACCESS_KEY": "****************************************",
                     "BUCKET_NAME": "gda-data-lake-us-west-1"
                 }
-        container = task_definition.add_container( "binance-container", image=image, environment=environment)
+        logDetail = logs.LogGroup(self, "BinanceServicesLogGroup", log_group_name="/ecs/binance-log-group", retention=logs.RetentionDays.SIX_MONTHS, removal_policy=cdk.RemovalPolicy.DESTROY)
+        logging = ecs.LogDriver.aws_logs(stream_prefix = "ecs", log_group=logDetail)
+        container = task_definition.add_container( "binance-container", image=image,
+                environment=environment,
+                logging = logging
+                )
 
         # port_mapping = ecs.PortMapping(container_port=8080, host_port=8080)
         # container.add_port_mappings(port_mapping)
