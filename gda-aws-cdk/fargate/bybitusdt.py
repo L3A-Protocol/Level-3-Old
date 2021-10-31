@@ -8,7 +8,7 @@ from fargate.exchangebase import ExchangeBase
 
 EXCHNAGE_NAME       = 'ByBit-USDT'
 BIN_PATH            = "/app/lws-bybit"
-REPO_ARN            = "arn:aws:ecr:us-west-1:381452754685:repository/bybit04"
+REPO_ARN            = "arn:aws:ecr:us-west-1:381452754685:repository/bybit-usdt"
 
 class BybitUSDTConstruct(ExchangeBase):
 

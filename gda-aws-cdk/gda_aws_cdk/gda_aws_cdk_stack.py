@@ -9,8 +9,9 @@ from aws_cdk import (core as cdk,
                      aws_ec2 as ec2,
                      aws_ecs as ecs)
 
-from fargate.binance import BinanceConstruct
-from fargate.bybit   import BybitConstruct
+from fargate.binance    import BinanceConstruct
+from fargate.bybit      import BybitConstruct
+from fargate.bybitusdt  import BybitUSDTConstruct
 
 class GdaAwsCdkStack(cdk.Stack):
 
@@ -26,30 +27,47 @@ class GdaAwsCdkStack(cdk.Stack):
 
         cluster = ecs.Cluster(self, "GDADataLakeCluster", vpc=vpc)
 
-        binance_construct = BinanceConstruct(self, "binance-service", bucket=bucket, cluster=cluster)
+        binance_construct       = BinanceConstruct(self, "binance-service", bucket=bucket, cluster=cluster)
 
-        bybit_orderbook_200 = BybitConstruct(self, 'bybit-orderbook-200-service',
+        bybit_orderbook_200     = BybitConstruct(self, 'bybit-orderbook-200-service',
                                     bucket=bucket,
                                     cluster=cluster,
                                     topic="orderBook_200.100ms.BTCUSD"
                                 )
 
-        bybit_insurance     = BybitConstruct(self, 'bybit-insurance-service',
+        bybit_insurance         = BybitConstruct(self, 'bybit-insurance-service',
                                     bucket=bucket,
                                     cluster=cluster,
                                     topic="insurance"
                                 )
 
-        bybit_trade         = BybitConstruct(self, 'bybit-trade-service',
+        bybit_trade             = BybitConstruct(self, 'bybit-trade-service',
                                     bucket=bucket,
                                     cluster=cluster,
                                     topic="trade"
                                 )
 
-        bybit_klinev21      = BybitConstruct(self, 'bybit-klinev21-service',
+        bybit_klinev21          = BybitConstruct(self, 'bybit-klinev21-service',
                                     bucket=bucket,
                                     cluster=cluster,
                                     topic="klineV2.1.BTCUSD"
                                 )
 
+        bybitusdt_orderbook_200 = BybitUSDTConstruct(self, "bybitusdt-orderbook-200",
+                                    bucket=bucket,
+                                    cluster=cluster,
+                                    topic="orderBook_200.100ms.BTCUSDT"
+                                )
+
+        bybitusdt_trade         = BybitUSDTConstruct(self, "bybitusdt-trade",
+                                    bucket=bucket,
+                                    cluster=cluster,
+                                    topic="trade.BTCUSDT"
+                                )
+
+        bybitusdt_candle        = BybitUSDTConstruct(self, "bybitusdt-candle",
+                                    bucket=bucket,
+                                    cluster=cluster,
+                                    topic="candle.1.BTCUSDT"
+                                )
 
