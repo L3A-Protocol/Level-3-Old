@@ -10,6 +10,7 @@ from aws_cdk import (core as cdk,
                      aws_ecs as ecs)
 
 from fargate.binance import BinanceConstruct
+from fargate.bybit   import BybitConstruct
 
 class GdaAwsCdkStack(cdk.Stack):
 
@@ -26,4 +27,29 @@ class GdaAwsCdkStack(cdk.Stack):
         cluster = ecs.Cluster(self, "GDADataLakeCluster", vpc=vpc)
 
         binance_construct = BinanceConstruct(self, "binance-service", bucket=bucket, cluster=cluster)
+
+        bybit_orderbook_200 = BybitConstruct(self, 'bybit-orderbook-200-service',
+                                    bucket=bucket,
+                                    cluster=cluster,
+                                    topic="orderBook_200.100ms.BTCUSD"
+                                )
+
+        bybit_insurance     = BybitConstruct(self, 'bybit-insurance-service',
+                                    bucket=bucket,
+                                    cluster=cluster,
+                                    topic="insurance"
+                                )
+
+        bybit_trade         = BybitConstruct(self, 'bybit-trade-service',
+                                    bucket=bucket,
+                                    cluster=cluster,
+                                    topic="trade"
+                                )
+
+        bybit_klinev21      = BybitConstruct(self, 'bybit-klinev21-service',
+                                    bucket=bucket,
+                                    cluster=cluster,
+                                    topic="klineV2.1.BTCUSD"
+                                )
+
 

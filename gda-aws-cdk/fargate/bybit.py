@@ -11,7 +11,7 @@ SERVICE_PREFIX      = 'bybit'
 BIN_PATH            = "/app/lws-bybit"
 REPO_ARN            = "arn:aws:ecr:us-west-1:381452754685:repository/bybit04"
 
-class BBybitConstruct(cdk.Construct):
+class BybitConstruct(cdk.Construct):
 
     def __init__(self, scope: cdk.Construct, id: str, bucket: s3.Bucket, cluster: ecs.Cluster, topic: str, **kwargs):
         super().__init__(scope, id, **kwargs)
