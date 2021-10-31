@@ -6,33 +6,36 @@ from aws_cdk import (core as cdk,
                      aws_ecr as ecr,
                      aws_logs as logs)
 
-EXCHNAGE_NAME       = 'ByBit'
-SERVICE_PREFIX      = 'bybit'
-BIN_PATH            = "/app/lws-bybit"
-REPO_ARN            = "arn:aws:ecr:us-west-1:381452754685:repository/bybit04"
+class ExchangeBase(cdk.Construct):
 
-class BybitConstruct(cdk.Construct):
-
-    def __init__(self, scope: cdk.Construct, id: str, bucket: s3.Bucket, cluster: ecs.Cluster, topic: str, **kwargs):
+    def __init__(self, scope: cdk.Construct, id:str,
+                exchnage_name:str,
+                binary_path:str,
+                repo_arn:str,
+                bucket:s3.Bucket,
+                cluster:ecs.Cluster,
+                topic: str, **kwargs):
         super().__init__(scope, id, **kwargs)
 
-        task_id = (f'{SERVICE_PREFIX}-td-{topic}').replace('.','-')
-        log_id = f'{EXCHNAGE_NAME}ServicesLogGroup'
-        log_group_name = (f'/ecs/{SERVICE_PREFIX}-{topic}-log-group').replace('.','-')
-        container_id = (f'{SERVICE_PREFIX}-{topic}-container').replace('.','-')
+        service_prefix = exchnage_name.lower()
+
+        task_id = (f'{service_prefix}-td-{topic}').replace('.','-')
+        log_id = f'{exchnage_name}ServicesLogGroup'
+        log_group_name = (f'/ecs/{service_prefix}-{topic}-log-group').replace('.','-')
+        container_id = (f'{service_prefix}-{topic}-container').replace('.','-')
         stream_prefix = "ecs"
 
         task_definition = ecs.FargateTaskDefinition( self, task_id,
                 cpu=256, memory_limit_mib=512)
 
-        repo = ecr.Repository.from_repository_arn(self, f'{SERVICE_PREFIX}-repo', REPO_ARN)
+        repo = ecr.Repository.from_repository_arn(self, f'{service_prefix}-repo', repo_arn)
 
         image = ecs.ContainerImage.from_ecr_repository(repo)
         access_key_id       = os.environ["EXCHANGE_ACCESS_KEY_ID"]
         access_secret_key   = os.environ["EXCHANGE_SECRET_ACCESS_KEY"]
         environment = {
-                    "EXCHANGE": EXCHNAGE_NAME,
-                    "C_BINARY_PATH": BIN_PATH,
+                    "EXCHANGE": exchnage_name,
+                    "C_BINARY_PATH": binary_path,
                     "TOPIC": topic,
                     "AWS_ACCESS_KEY_ID": access_key_id,
                     "AWS_SECRET_ACCESS_KEY": access_secret_key,
