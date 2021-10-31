@@ -12,6 +12,8 @@ from aws_cdk import (core as cdk,
 from fargate.binance    import BinanceConstruct
 from fargate.bybit      import BybitConstruct
 from fargate.bybitusdt  import BybitUSDTConstruct
+from fargate.coinbase   import CoinbaseConstruct
+
 
 class GdaAwsCdkStack(cdk.Stack):
 
@@ -71,3 +73,14 @@ class GdaAwsCdkStack(cdk.Stack):
                                     topic="candle.1.BTCUSDT"
                                 )
 
+        coinbase_ethusd         = CoinbaseConstruct(self, "coinbase-ethusd",
+                                    bucket=bucket,
+                                    cluster=cluster,
+                                    topic="ETH-USD"
+                                )
+
+        coinbase_btcusd         = CoinbaseConstruct(self, "coinbase-btcusd",
+                                    bucket=bucket,
+                                    cluster=cluster,
+                                    topic="BTC-USD"
+                                )
