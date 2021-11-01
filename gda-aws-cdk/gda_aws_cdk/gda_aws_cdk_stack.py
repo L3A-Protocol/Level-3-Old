@@ -7,7 +7,8 @@ import os
 from aws_cdk import (core as cdk,
                      aws_s3 as s3,
                      aws_ec2 as ec2,
-                     aws_ecs as ecs)
+                     aws_ecs as ecs,
+                     aws_lambda as _lambda)
 
 from fargate.binance    import BinanceConstruct
 from fargate.bybit      import BybitConstruct
@@ -84,3 +85,10 @@ class GdaAwsCdkStack(cdk.Stack):
                                     cluster=cluster,
                                     topic="BTC-USD"
                                 )
+
+        task_switcher_lambda = _lambda.Function(
+            self, 'TaskSwitcher',
+            runtime=_lambda.Runtime.PYTHON_3_7,
+            code=_lambda.Code.from_asset('lambda'),
+            handler='task_switcher.handler',
+        )
