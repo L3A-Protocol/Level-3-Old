@@ -4,7 +4,10 @@ var https = require('https');
 var zlib = require('zlib');
 var crypto = require('crypto');
 
-var endpoint = 'search-gdadatalake-3j64pumoaczj224srjngvx34wa.us-west-1.es.amazonaws.com';
+const SHA_256 = 'sha256';
+const endpoint_region = 'us-west-1';
+const endpoint_service = 'es';
+const opensearch_endpoint = 'search-gdadatalake-3j64pumoaczj224srjngvx34wa.us-west-1.es.amazonaws.com';
 
 // Set this to true if you want to debug why data isn't making it to
 // your Elasticsearch cluster. This will enable logging of failed items
@@ -16,8 +19,8 @@ exports.handler = function(input, context) {
     var zippedInput = new Buffer.from(input.awslogs.data, 'base64');
 
     // decompress the input
-    zlib.gunzip(zippedInput, function(error, buffer) {
-        if (error) { context.fail(error); return; }
+    zlib.gunzip(zippedInput, function(zip_error, buffer) {
+        if (zip_error) { context.fail(zip_error); return; }
 
         // parse the input from JSON
         var awslogsData = JSON.parse(buffer.toString('utf8'));
@@ -57,18 +60,10 @@ function transform(payload) {
     var bulkRequestBody = '';
 
     payload.logEvents.forEach(function(logEvent) {
-        // var timestamp = new Date(1 * logEvent.timestamp);
-
-        // index name format: cwl-YYYY.MM.DD
-        // var indexName = [
-        //     'cwl-' + timestamp.getUTCFullYear(),              // year
-        //     ('0' + (timestamp.getUTCMonth() + 1)).slice(-2),  // month
-        //     ('0' + timestamp.getUTCDate()).slice(-2)          // day
-        // ].join('.');
         
         var indexName = ('cwl'+payload.logGroup).replace(/\//g, "-");
         
-        console.log(indexName);
+        // console.log(indexName);
 
         var source = buildSource(logEvent.message, logEvent.extractedFields);
         source['@id'] = logEvent.id;
@@ -78,7 +73,7 @@ function transform(payload) {
         source['@log_group'] = payload.logGroup;
         source['@log_stream'] = payload.logStream;
 
-        console.log(source);
+        // console.log(source);
 
         var action = { "index": {} };
         action.index._index = indexName;
@@ -94,35 +89,37 @@ function transform(payload) {
 }
 
 function buildSource(message, extractedFields) {
-    if (extractedFields) {
-        var source = {};
+    var source = {};
 
-        for (var key in extractedFields) {
-            if (extractedFields.hasOwnProperty(key) && extractedFields[key]) {
-                var value = extractedFields[key];
-
-                if (isNumeric(value)) {
-                    source[key] = 1 * value;
-                    continue;
-                }
-
-                var jsonSubString = extractJson(value);
-                if (jsonSubString !== null) {
-                    source['$' + key] = JSON.parse(jsonSubString);
-                }
-
-                source[key] = value;
-            }
+    if (!extractedFields) {
+        var jsonMessage = extractJson(message);
+        if (jsonMessage !== null) {
+            return JSON.parse(jsonMessage);
         }
-        return source;
+
+        return {};
     }
 
-    var jsonSubString = extractJson(message);
-    if (jsonSubString !== null) {
-        return JSON.parse(jsonSubString);
+    for (var key in extractedFields) {
+        if (extractedFields.hasOwnProperty(key) && extractedFields[key]) {
+            var value = extractedFields[key];
+
+            if (isNumeric(value)) {
+                source[key] = 1 * value;
+                continue;
+            }
+
+            var jsonSubString = extractJson(value);
+            if (jsonSubString !== null) {
+                source['$' + key] = JSON.parse(jsonSubString);
+            }
+
+            source[key] = value;
+        }
     }
 
-    return {};
+    return source;
+
 }
 
 function extractJson(message) {
@@ -144,7 +141,7 @@ function isNumeric(n) {
 }
 
 function post(body, callback) {
-    var requestParams = buildRequest(endpoint, body);
+    var requestParams = buildRequest(opensearch_endpoint, endpoint_region, endpoint_service, body);
 
     var request = https.request(requestParams, function(response) {
         var responseBody = '';
@@ -188,10 +185,7 @@ function post(body, callback) {
     request.end(requestParams.body);
 }
 
-function buildRequest(endpoint, body) {
-    var endpointParts = endpoint.match(/^([^\.]+)\.?([^\.]*)\.?([^\.]*)\.amazonaws\.com$/);
-    var region = endpointParts[2];
-    var service = endpointParts[3];
+function buildRequest(endpoint, region, service, body) {
     var datetime = (new Date()).toISOString().replace(/[:\-]|\.\d{3}/g, '');
     var date = datetime.substr(0, 8);
     var kDate = hmac('AWS4' + process.env.AWS_SECRET_ACCESS_KEY, date);
@@ -250,11 +244,11 @@ function buildRequest(endpoint, body) {
 }
 
 function hmac(key, str, encoding) {
-    return crypto.createHmac('sha256', key).update(str, 'utf8').digest(encoding);
+    return crypto.createHmac(SHA_256, key).update(str, 'utf8').digest(encoding);
 }
 
 function hash(str, encoding) {
-    return crypto.createHash('sha256').update(str, 'utf8').digest(encoding);
+    return crypto.createHash(SHA_256).update(str, 'utf8').digest(encoding);
 }
 
 function logFailure(error, failedItems) {
