@@ -17,7 +17,7 @@ from time import time
 
 from log_json import log_json
 
-from opensearchclient import OpenSearchClient
+from opensearchclient import OpenSearchClient, Index
 
 # Variables
 
@@ -45,18 +45,14 @@ mutex = Lock()
 stop_it = False
 
 osclient = None
-index_name = (f'data-{exchange}-{topic}').lower().replace('.','-').replace('_','-')
-doc_id = 0
+data_index = None
 
 def submit_line_to_opensearch(line):
-    global doc_id
-    global index_name
-    global osclient
+    global data_index
 
     try:
         document = str_to_json(line)
-        doc_id += 1
-        assert osclient.add_document(index_name=index_name, id=doc_id, document=document )
+        assert data_index.add_document(document=document )
     except Exception as ex:
         print(ex)
 
@@ -164,7 +160,7 @@ def main():
     global stop_it
     global old_flush_timestamp
     global osclient
-    global index_name
+    global data_index
 
     log = log_json()
 
@@ -201,7 +197,8 @@ def main():
         log.create ("ERROR", "Cannot access the OpenSearch host")
         sys.exit()
 
-    if not osclient.create_index(index_name=index_name):
+    data_index = Index(osclient, 'data')
+    if not data_index.create():
         log.create ("ERROR", "Cannot create OpenSearch index")
         sys.exit()
 

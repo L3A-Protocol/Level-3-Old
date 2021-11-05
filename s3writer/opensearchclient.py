@@ -1,4 +1,5 @@
 import os
+import uuid
 from opensearchpy import OpenSearch
 from dotenv import load_dotenv
 from osbot_utils.utils.Http import GET_json, GET
@@ -29,6 +30,10 @@ class OpenSearchClient(object):
         )
 
         self.enabled = False
+        self.server_online()
+
+        if not self.enabled:
+            print('OpenSearch client failed to connect')
 
     def server_online(self):
         elastic_url = f'{self.schema}://{self.host}:{self.port}'
@@ -40,18 +45,12 @@ class OpenSearchClient(object):
         except:
             return False
 
-    def create_index(self, index_name):
-
-        if not self.enabled:
-            return False
-
-        try:
-            self.client.indices.delete(index_name)
-        except Exception as ex:
-            print(ex)
-            return False
-
-        index_body = {
+class Index(object):
+    def __init__(self, client:OpenSearchClient, prefix:str):
+        self.osclient = client
+        self.name = f'{prefix}-{str(uuid.uuid4())}'
+        self.id = 0
+        self.index_body = {
             'settings': {
                 'index': {
                 'number_of_shards': 4
@@ -59,43 +58,87 @@ class OpenSearchClient(object):
             }
         }
 
+    def delete(self):
+        response = None
+
+        if not self.osclient.enabled:
+            return None
+
         try:
-            response = self.client.indices.create(index_name, body=index_body)
-            # print(response)
+            response = self.osclient.client.indices.delete(self.name)
         except Exception as ex:
             print(ex)
-            return False
-        return True
+            return None
 
-    def add_document(self, index_name, id, document):
-        if not self.enabled:
-            return False
+        return response
+
+    def create(self):
+        response = None
+
+        if not self.osclient.enabled:
+            return None
+
+        self.delete()
 
         try:
-            response = self.client.index(
-                index = index_name,
+            response = self.osclient.client.indices.create(self.name, body=self.index_body)
+        except Exception as ex:
+            print(ex)
+            return None
+
+        return response
+
+    def add_document(self, document):
+        response = None
+
+        if not self.osclient.enabled:
+            return None
+
+        self.id += 1
+
+        try:
+            response = self.osclient.client.index(
+                index = self.name,
                 body = document,
-                id = id,
+                id = self.id,
                 refresh = True
             )
-            # print(response)
         except Exception as ex:
             print(ex)
-            return False
-        return True
+            return None
 
+        return response
+
+    def run_query(self, query):
+        response = None
+        try:
+            response = self.osclient.client.search(
+                    body = query,
+                    index = self.name
+                )
+        except Exception as ex:
+            print(ex)
+
+        return response
+
+    def delete_document(self, id):
+        response = None
+        try:
+            response = self.osclient.client.delete(
+                    index = self.name,
+                    id = id
+                )
+        except Exception as ex:
+            print(ex)
+        return response
 
 def test_it():
+    print('\nConnecting:')
     osclient = OpenSearchClient()
 
-    print(osclient.client.info)
-    print(osclient.server_online())
-
-
-    # Create an index with non-default settings.
-    index_name = 'python-test-index'
     print('\nCreating index:')
-    osclient.create_index(index_name)
+    test_index = Index(osclient,'python-test-index')
+    test_index.create()
 
     # Add a document to the index.
     document = {
@@ -103,46 +146,29 @@ def test_it():
     'director': 'Bennett Miller',
     'year': '2011'
     }
-    id = '1'
 
     print('\nAdding document:')
-    osclient.add_document(index_name, id, document)
+    print(test_index.add_document(document))
 
     # Search for the document.
     q = 'miller'
     query = {
-    'size': 5,
-    'query': {
-        'multi_match': {
-        'query': q,
-        'fields': ['title^2', 'director']
+        'size': 5,
+        'query': {
+            'multi_match': {
+            'query': q,
+            'fields': ['title^2', 'director']
+            }
         }
     }
-    }
 
-    response = osclient.client.search(
-        body = query,
-        index = index_name
-    )
     print('\nSearch results:')
-    print(response)
-
-    # Delete the document.
-    response = osclient.client.delete(
-        index = index_name,
-        id = id
-    )
+    print(test_index.run_query(query))
 
     print('\nDeleting document:')
-    print(response)
-
-    # Delete the index.
-    response = osclient.client.indices.delete(
-        index = index_name
-    )
+    print(test_index.delete_document(test_index.id))
 
     print('\nDeleting index:')
-    print(response)
-
+    print(test_index.delete())
 
 # test_it()
