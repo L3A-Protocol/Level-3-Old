@@ -17,6 +17,8 @@ from time import time
 
 from log_json import log_json
 
+from opensearchclient import OpenSearchClient
+
 # Variables
 
 load_dotenv(override=True)
@@ -41,6 +43,22 @@ raw_lines = ''
 number_of_lines = 0
 mutex = Lock()
 stop_it = False
+
+osclient = None
+index_name = (f'data-{exchange}-{topic}').lower().replace('.','-').replace('_','-')
+doc_id = 0
+
+def submit_line_to_opensearch(line):
+    global doc_id
+    global index_name
+    global osclient
+
+    try:
+        document = str_to_json(line)
+        doc_id += 1
+        assert osclient.add_document(index_name=index_name, id=doc_id, document=document )
+    except Exception as ex:
+        print(ex)
 
 # Functions
 
@@ -85,6 +103,8 @@ def verify_feed_frequency (timestamp, number_of_lines, period):
 def process_raw_line(line):
     global raw_lines
     global number_of_lines
+
+    submit_line_to_opensearch(line)
 
     mutex.acquire()
     try:
@@ -143,12 +163,10 @@ def flush_thread_function():
 def main():
     global stop_it
     global old_flush_timestamp
+    global osclient
+    global index_name
+
     log = log_json()
-
-    old_flush_timestamp = get_current_timestamp()
-
-    x = Thread(target=flush_thread_function, args=())
-    x.start()
 
     if not exchange:
         log.create("ERROR", "The exchange is not specified")
@@ -177,6 +195,20 @@ def main():
     if not access_secret_key:
         log.create ("ERROR", "AWS secret key is not specified")
         sys.exit()
+
+    osclient = OpenSearchClient()
+    if not osclient or not osclient.server_online():
+        log.create ("ERROR", "Cannot access the OpenSearch host")
+        sys.exit()
+
+    if not osclient.create_index(index_name=index_name):
+        log.create ("ERROR", "Cannot create OpenSearch index")
+        sys.exit()
+
+    old_flush_timestamp = get_current_timestamp()
+
+    x = Thread(target=flush_thread_function, args=())
+    x.start()
 
     try:
         os.system(f'{c_bin_path} --topic {topic} &')
