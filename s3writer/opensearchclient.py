@@ -45,6 +45,20 @@ class OpenSearchClient(object):
         except:
             return False
 
+    def delete_index(self, index_name):
+        response = None
+
+        if not self.enabled:
+            return None
+
+        try:
+            response = self.client.indices.delete(index_name)
+        except Exception as ex:
+            print(ex)
+            return None
+
+        return response
+
 class Index(object):
     def __init__(self, client:OpenSearchClient, prefix:str):
         self.osclient = client
@@ -59,18 +73,7 @@ class Index(object):
         }
 
     def delete(self):
-        response = None
-
-        if not self.osclient.enabled:
-            return None
-
-        try:
-            response = self.osclient.client.indices.delete(self.name)
-        except Exception as ex:
-            print(ex)
-            return None
-
-        return response
+        return self.osclient.delete_index(self.name)
 
     def create(self):
         response = None
@@ -136,6 +139,9 @@ def test_it():
     print('\nConnecting:')
     osclient = OpenSearchClient()
 
+    # osclient.delete_index('data-39c84343-1380-4e77-9ac2-806df9b1e343')
+    # osclient.delete_index('data-bybit-orderbookl2-25-btcusd')
+
     print('\nCreating index:')
     test_index = Index(osclient,'python-test-index')
     test_index.create()
@@ -171,4 +177,4 @@ def test_it():
     print('\nDeleting index:')
     print(test_index.delete())
 
-# test_it()
+test_it()
