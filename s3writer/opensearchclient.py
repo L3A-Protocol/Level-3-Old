@@ -177,4 +177,4 @@ def test_it():
     print('\nDeleting index:')
     print(test_index.delete())
 
-test_it()
+# test_it()
