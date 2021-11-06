@@ -39,8 +39,6 @@ s3 = boto3.resource(
 )
 
 old_flush_timestamp = 0
-raw_lines = ''
-number_of_lines = 0
 mutex = Lock()
 stop_it = False
 
@@ -73,28 +71,11 @@ def s3_bucket_folders(data, _symbol, year, month, day):
 def s3_bucket_raw_data_folders(topic, year, month, day):
     return f'raw-data/exchange={exchange}/{topic}/year={str(year)}/month={str(month)}/day={str(day)}/'
 
-def verify_feed_frequency (timestamp, number_of_lines, period):
-    global feed_interval
-    log = log_json()
-
-    expected_feed = math.floor(period / feed_interval)
-
-    details = {"details":
-                {
-                    "timestamp":    timestamp,
-                    "period":       period,
-                    "lines_read":   number_of_lines,
-                    "expected":     expected_feed
-                }
-            }
-
-    log.create("INFO","Latest feed frequency", details)
-
-    if expected_feed > number_of_lines:
-        # Allert low feed frequency
-        log.create("ERROR", 'Low feed frequency')
-
 class s3writer(object):
+    def __init__(self):
+        self.raw_lines = ''
+        self.number_of_lines = 0
+
     def readline(self, fifo):
         line = ''
         try:
@@ -116,22 +97,38 @@ class s3writer(object):
             print(ex)
 
     def process_raw_line(self, line):
-        global raw_lines
-        global number_of_lines
-
         self.submit_line_to_opensearch(line)
 
         mutex.acquire()
         try:
-            raw_lines = raw_lines + line
-            number_of_lines += 1
+            self.raw_lines = self.raw_lines + line
+            self.number_of_lines += 1
         finally:
             mutex.release()
 
+    def verify_feed_frequency (self, timestamp, period):
+        global feed_interval
+        log = log_json()
+
+        expected_feed = math.floor(period / feed_interval)
+
+        details = {"details":
+                    {
+                        "timestamp":    timestamp,
+                        "period":       period,
+                        "lines_read":   self.number_of_lines,
+                        "expected":     expected_feed
+                    }
+                }
+
+        log.create("INFO","Latest feed frequency", details)
+
+        if expected_feed > self.number_of_lines:
+            # Allert low feed frequency
+            log.create("ERROR", 'Low feed frequency')
+
     def flush_thread_function(self):
         global stop_it
-        global raw_lines
-        global number_of_lines
         global old_flush_timestamp
 
         if stop_it:
@@ -150,15 +147,15 @@ class s3writer(object):
             seq = (int)(utc_timestamp * 1000000)
 
             folders = s3_bucket_raw_data_folders(topic, year, month, day)
-            if raw_lines:
-                s3.Bucket(bucket_name).put_object(Key=f'{folders}{seq}', Body=raw_lines)
+            if self.raw_lines:
+                s3.Bucket(bucket_name).put_object(Key=f'{folders}{seq}', Body=self.raw_lines)
 
             period = math.floor((utc_timestamp - old_flush_timestamp) * 1000)
-            verify_feed_frequency(seq, number_of_lines, period)
+            self.verify_feed_frequency(seq, period)
             old_flush_timestamp = utc_timestamp
 
-            raw_lines = ''
-            number_of_lines = 0
+            self.raw_lines = ''
+            self.number_of_lines = 0
         finally:
             mutex.release()
 
