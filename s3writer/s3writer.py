@@ -203,7 +203,7 @@ class s3writer(object):
             log.create ("ERROR", "Cannot access the OpenSearch host")
             sys.exit()
 
-        data_index = Index(osclient, 'data')
+        data_index = Index(osclient, 'data', exchange=exchange, topic=topic)
         if not data_index.create():
             log.create ("ERROR", "Cannot create OpenSearch index")
             sys.exit()

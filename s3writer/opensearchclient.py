@@ -61,7 +61,7 @@ class OpenSearchClient(object):
         return response
 
 class Index(object):
-    def __init__(self, client:OpenSearchClient, prefix:str):
+    def __init__(self, client:OpenSearchClient, prefix:str, exchange:str, topic:str ):
         self.osclient = client
         self.name = f'{prefix}-{str(uuid.uuid4())}'
         self.id = 0
@@ -72,6 +72,8 @@ class Index(object):
                 }
             }
         }
+        self.exchage = exchange
+        self.topic = topic
 
     def delete(self):
         return self.osclient.delete_index(self.name)
@@ -102,8 +104,10 @@ class Index(object):
 
         try:
             data = {
-                "timestamp": datetime.datetime.utcnow().isoformat(),
-                "document" : document
+                "timestamp" : datetime.datetime.utcnow().isoformat(),
+                "exchange"  : self.exchage,
+                "topic"     : self.topic,
+                "document"  : document
             }
             response = self.osclient.client.index(
                 index = self.name,
@@ -145,7 +149,7 @@ def test_it():
     osclient = OpenSearchClient()
 
     print('\nCreating index:')
-    test_index = Index(osclient,'python-test-index')
+    test_index = Index(osclient,'python-test-index','None','None')
     test_index.create()
 
     # Add a document to the index.
