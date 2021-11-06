@@ -61,7 +61,14 @@ def submit_line_to_opensearch(line):
 def handler(signum, frame):
     global stop_it
     stop_it = True
-    print("Stopping the application. Please allow some time for the theads to finish up gracefully")
+
+    print("")
+    print("==> Stopping the application. Please allow some time for the theads to finish up gracefully")
+    print("")
+
+    if osclient and osclient.enabled and data_index:
+        osclient.delete_index(data_index.name)
+
     sys.exit()
 
 def get_current_timestamp():
@@ -156,89 +163,90 @@ def flush_thread_function():
 
 # Functional code
 
-def main():
-    global stop_it
-    global old_flush_timestamp
-    global osclient
-    global data_index
+class s3writer(object):
+    def run(self):
+        global stop_it
+        global old_flush_timestamp
+        global osclient
+        global data_index
 
-    log = log_json()
+        log = log_json()
 
-    if not exchange:
-        log.create("ERROR", "The exchange is not specified")
-        sys.exit()
-
-    if not c_bin_path:
-        log.create("ERROR", "The binary path is not specified")
-        sys.exit()
-
-    if not topic:
-        log.create ("ERROR", "The topic is not specified")
-        sys.exit()
-
-    if not bucket_name:
-        log.create ("ERROR" "The bucket_name is not specified")
-        sys.exit()
-
-    if not file_exists(c_bin_path):
-        log.create ("ERROR", f"File {c_bin_path} does not exist")
-        sys.exit()
-
-    if not access_key_id:
-        log.create ("ERROR", "AWS access key is not specified")
-        sys.exit()
-
-    if not access_secret_key:
-        log.create ("ERROR", "AWS secret key is not specified")
-        sys.exit()
-
-    osclient = OpenSearchClient()
-    if not osclient or not osclient.server_online():
-        log.create ("ERROR", "Cannot access the OpenSearch host")
-        sys.exit()
-
-    data_index = Index(osclient, 'data')
-    if not data_index.create():
-        log.create ("ERROR", "Cannot create OpenSearch index")
-        sys.exit()
-
-    old_flush_timestamp = get_current_timestamp()
-
-    x = Thread(target=flush_thread_function, args=())
-    x.start()
-
-    try:
-        os.system(f'{c_bin_path} --topic {topic} &')
-    except OSError as oe:
-        if oe.errno != errno.EEXIST:
-            log.create ('ERROR', f'Failed to start {c_bin_path}')
+        if not exchange:
+            log.create("ERROR", "The exchange is not specified")
             sys.exit()
 
-    FIFO = f'/tmp/{topic}'
-    try:
-        os.mkfifo(FIFO)
-    except OSError as oe:
-        if oe.errno != errno.EEXIST:
-            log.create ("ERROR", f"Failed to create the pipe: {FIFO}")
+        if not c_bin_path:
+            log.create("ERROR", "The binary path is not specified")
             sys.exit()
 
-    with open(FIFO) as fifo:
-        while True:
-            if stop_it:
+        if not topic:
+            log.create ("ERROR", "The topic is not specified")
+            sys.exit()
+
+        if not bucket_name:
+            log.create ("ERROR" "The bucket_name is not specified")
+            sys.exit()
+
+        if not file_exists(c_bin_path):
+            log.create ("ERROR", f"File {c_bin_path} does not exist")
+            sys.exit()
+
+        if not access_key_id:
+            log.create ("ERROR", "AWS access key is not specified")
+            sys.exit()
+
+        if not access_secret_key:
+            log.create ("ERROR", "AWS secret key is not specified")
+            sys.exit()
+
+        osclient = OpenSearchClient()
+        if not osclient or not osclient.server_online():
+            log.create ("ERROR", "Cannot access the OpenSearch host")
+            sys.exit()
+
+        data_index = Index(osclient, 'data')
+        if not data_index.create():
+            log.create ("ERROR", "Cannot create OpenSearch index")
+            sys.exit()
+
+        old_flush_timestamp = get_current_timestamp()
+
+        x = Thread(target=flush_thread_function, args=())
+        x.start()
+
+        try:
+            os.system(f'{c_bin_path} --topic {topic} &')
+        except OSError as oe:
+            if oe.errno != errno.EEXIST:
+                log.create ('ERROR', f'Failed to start {c_bin_path}')
                 sys.exit()
 
-            line = readline(fifo)
+        FIFO = f'/tmp/{topic}'
+        try:
+            os.mkfifo(FIFO)
+        except OSError as oe:
+            if oe.errno != errno.EEXIST:
+                log.create ("ERROR", f"Failed to create the pipe: {FIFO}")
+                sys.exit()
 
-            if not line:
-                log.create("ERROR", "No line in FIFO")
-                continue
+        with open(FIFO) as fifo:
+            while True:
+                if stop_it:
+                    sys.exit()
 
-            try:
-                process_raw_line(line)
-            except Exception as ex:
-                log.create ('ERROR', f'process_raw_line: {ex}')
-                continue
+                line = readline(fifo)
+
+                if not line:
+                    log.create("ERROR", "No line in FIFO")
+                    continue
+
+                try:
+                    process_raw_line(line)
+                except Exception as ex:
+                    log.create ('ERROR', f'process_raw_line: {ex}')
+                    continue
 
 if __name__ == '__main__':
     signal.signal(signal.SIGINT, handler)
-    main()
+    s3writer().run()

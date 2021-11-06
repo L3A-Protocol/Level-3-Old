@@ -177,4 +177,5 @@ def test_it():
     print('\nDeleting index:')
     print(test_index.delete())
 
-# test_it()
+if __name__ == '__main__':
+    test_it()
