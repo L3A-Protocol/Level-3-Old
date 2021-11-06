@@ -8,9 +8,12 @@ topic       = os.getenv("TOPIC", 'none')
 
 class log_json(object):
 
-    def create(self, type, message, body = None):
+    def __init__(self):
+        self.log = {}
 
-        log = {'metadata':
+    def create(self, type, message, body = None, display = True):
+
+        self.log = {'metadata':
                 {
                     'exchange': exchange,
                     'topic':    topic
@@ -21,11 +24,12 @@ class log_json(object):
 
         if body:
             try:
-                log.update(body)          
+                self.log.update(body)
             finally:
                 pass
 
-        print (json_to_str(log, indent=0).replace('\n',''))
+        if display:
+            print (json_to_str(self.log, indent=0).replace('\n',''))
 
 if __name__ == '__main__':
     log = log_json()

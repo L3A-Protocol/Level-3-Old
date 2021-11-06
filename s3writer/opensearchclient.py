@@ -1,5 +1,6 @@
 import os
 import uuid
+import datetime
 from opensearchpy import OpenSearch
 from dotenv import load_dotenv
 from osbot_utils.utils.Http import GET_json, GET
@@ -100,9 +101,13 @@ class Index(object):
         self.id += 1
 
         try:
+            data = {
+                "timestamp": datetime.datetime.utcnow().isoformat(),
+                "document" : document
+            }
             response = self.osclient.client.index(
                 index = self.name,
-                body = document,
+                body = data,
                 id = self.id,
                 refresh = True
             )
@@ -138,9 +143,6 @@ class Index(object):
 def test_it():
     print('\nConnecting:')
     osclient = OpenSearchClient()
-
-    # osclient.delete_index('data-39c84343-1380-4e77-9ac2-806df9b1e343')
-    # osclient.delete_index('data-bybit-orderbookl2-25-btcusd')
 
     print('\nCreating index:')
     test_index = Index(osclient,'python-test-index')

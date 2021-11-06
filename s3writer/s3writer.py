@@ -47,15 +47,6 @@ stop_it = False
 osclient = None
 data_index = None
 
-def submit_line_to_opensearch(line):
-    global data_index
-
-    try:
-        document = str_to_json(line)
-        assert data_index.add_document(document=document )
-    except Exception as ex:
-        print(ex)
-
 # Functions
 
 def handler(signum, frame):
@@ -103,30 +94,6 @@ def verify_feed_frequency (timestamp, number_of_lines, period):
         # Allert low feed frequency
         log.create("ERROR", 'Low feed frequency')
 
-def process_raw_line(line):
-    global raw_lines
-    global number_of_lines
-
-    submit_line_to_opensearch(line)
-
-    mutex.acquire()
-    try:
-        raw_lines = raw_lines + line
-        number_of_lines += 1
-    finally:
-        mutex.release()
-
-def readline(fifo):
-    line = ''
-    try:
-        while True:
-            line += fifo.read(1)
-            if line.endswith('\n'):
-                break
-    except:
-        pass
-    return line
-
 def flush_thread_function():
     global stop_it
     global raw_lines
@@ -161,9 +128,40 @@ def flush_thread_function():
     finally:
         mutex.release()
 
-# Functional code
-
 class s3writer(object):
+    def readline(self, fifo):
+        line = ''
+        try:
+            while True:
+                line += fifo.read(1)
+                if line.endswith('\n'):
+                    break
+        except:
+            pass
+        return line
+
+    def submit_line_to_opensearch(self, line):
+        global data_index
+
+        try:
+            document = str_to_json(line)
+            assert data_index.add_document(document=document)
+        except Exception as ex:
+            print(ex)
+
+    def process_raw_line(self, line):
+        global raw_lines
+        global number_of_lines
+
+        self.submit_line_to_opensearch(line)
+
+        mutex.acquire()
+        try:
+            raw_lines = raw_lines + line
+            number_of_lines += 1
+        finally:
+            mutex.release()
+
     def run(self):
         global stop_it
         global old_flush_timestamp
@@ -235,14 +233,14 @@ class s3writer(object):
                 if stop_it:
                     sys.exit()
 
-                line = readline(fifo)
+                line = self.readline(fifo)
 
                 if not line:
                     log.create("ERROR", "No line in FIFO")
                     continue
 
                 try:
-                    process_raw_line(line)
+                    self.process_raw_line(line)
                 except Exception as ex:
                     log.create ('ERROR', f'process_raw_line: {ex}')
                     continue
