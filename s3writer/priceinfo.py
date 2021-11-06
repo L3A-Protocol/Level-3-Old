@@ -44,7 +44,7 @@ if __name__ == '__main__':
 
     raw_data = "{\"topic\":\"insurance.ETH\",\"data\":[{\"currency\":\"ETH\",\"timestamp\":\"2021-10-15T20:00:00Z\",\"wallet_balance\":4832029953542}]}"
     print(info.process_raw_data(EX_BYBIT,TOPIC_BYBIT_INSURANCE,raw_data))
-    raw_data = "{\"key\":\"none\"}"
+    raw_data = "{\"topic\":\"klineV2.1.BTCUSD\",\"data\":[{\"start\":1636174500,\"end\":1636174560,\"open\":61271,\"close\":61271,\"high\":61271,\"low\":61270.5,\"volume\":32951,\"turnover\":0.5377931700000002,\"timestamp\":1636174529019904,\"confirm\":false,\"cross_seq\":10550389298}],\"timestamp_e6\":1636174529026740}\n"
     print(info.process_raw_data(EX_BYBIT,TOPIC_BYBIT_KLINE,raw_data))
     raw_data = "{\"topic\":\"orderBook_200.100ms.BTCUSD\",\"type\":\"delta\",\"data\":{\"delete\":[{\"price\":\"61177.00\",\"symbol\":\"BTCUSD\",\"id\":611770000,\"side\":\"Sell\"},{\"price\":\"60955.50\",\"symbol\":\"BTCUSD\",\"id\":609555000,\"side\":\"Buy\"}],\"update\":[{\"price\":\"61017.00\",\"symbol\":\"BTCUSD\",\"id\":610170000,\"side\":\"Buy\",\"size\":1929},{\"price\":\"60965.50\",\"symbol\":\"BTCUSD\",\"id\":609655000,\"side\":\"Buy\",\"size\":10149},{\"price\":\"61076.00\",\"symbol\":\"BTCUSD\",\"id\":610760000,\"side\":\"Sell\",\"size\":18},{\"price\":\"60916.50\",\"symbol\":\"BTCUSD\",\"id\":609165000,\"side\":\"Buy\",\"size\":3500}],\"insert\":[{\"price\":\"61051.50\",\"symbol\":\"BTCUSD\",\"id\":610515000,\"side\":\"Sell\",\"size\":20000},{\"price\":\"60902.00\",\"symbol\":\"BTCUSD\",\"id\":609020000,\"side\":\"Buy\",\"size\":335024}],\"transactTimeE6\":0},\"cross_seq\":10548595035,\"timestamp_e6\":1636156902211277}"
     print(info.process_raw_data(EX_BYBIT,TOPIC_BYBIT_OB200,raw_data))

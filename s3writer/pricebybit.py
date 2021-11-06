@@ -53,13 +53,37 @@ class PriceBybit(PriceBase):
 
         return True
 
+    def verify_kline_structure(self, json_data):
+        if not 'topic' in json_data:
+            return False
+
+        if not 'data' in json_data:
+            return False
+
+        if not 'timestamp_e6' in json_data:
+            return False
+
+        for entry in json_data['data']:
+            if not "close" in entry:
+                return False
+            break
+
+        return True
+
+
     def process_json_data(self, topic:str, json_data):
         retval = None
 
         if TOPIC_BYBIT_INSURANCE    == topic:
             return retval
         elif TOPIC_BYBIT_KLINE      == topic:
-            pass
+            for entry in json_data['data']:
+                symbol  = 'BTCUSD'
+                price   = float(entry["close"])
+                timestamp = int(json_data["timestamp_e6"]) / 1e3
+                retval = self.getJson(symbol=symbol, price=price, timestamp=timestamp)
+                # TODO: process all entries
+                break
         elif TOPIC_BYBIT_OB200      == topic and self.verify_ob200_structure(json_data):
             insert = json_data['data']['insert']
             for entry in insert:
@@ -87,6 +111,7 @@ if __name__ == '__main__':
     json_data = {"topic":"insurance.ETH","data":[{"currency":"ETH","timestamp":"2021-10-15T20:00:00Z","wallet_balance":4832029953542}]}
     print(info.process_json_data(TOPIC_BYBIT_INSURANCE,json_data))
 
+    json_data = {"topic":"klineV2.1.BTCUSD","data":[{"start":1636174500,"end":1636174560,"open":61271,"close":61271,"high":61271,"low":61270.5,"volume":32951,"turnover":0.5377931700000002,"timestamp":1636174529019904,"confirm":"false","cross_seq":10550389298}],"timestamp_e6":1636174529026740}
     print(info.process_json_data(TOPIC_BYBIT_KLINE,json_data))
 
     json_data = {"topic":"orderBook_200.100ms.BTCUSD","type":"delta","data":{"delete":[{"price":"61177.00","symbol":"BTCUSD","id":611770000,"side":"Sell"},{"price":"60955.50","symbol":"BTCUSD","id":609555000,"side":"Buy"}],"update":[{"price":"61017.00","symbol":"BTCUSD","id":610170000,"side":"Buy","size":1929},{"price":"60965.50","symbol":"BTCUSD","id":609655000,"side":"Buy","size":10149},{"price":"61076.00","symbol":"BTCUSD","id":610760000,"side":"Sell","size":18},{"price":"60916.50","symbol":"BTCUSD","id":609165000,"side":"Buy","size":3500}],"insert":[{"price":"61051.50","symbol":"BTCUSD","id":610515000,"side":"Sell","size":20000},{"price":"60902.00","symbol":"BTCUSD","id":609020000,"side":"Buy","size":335024}],"transactTimeE6":0},"cross_seq":10548595035,"timestamp_e6":1636156902211277}
