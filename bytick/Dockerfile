@@ -3,6 +3,7 @@ FROM    gdafund/ubuntu-python
 RUN mkdir /app
 RUN pip3 install numpy
 RUN pip3 install pandas
+RUN pip3 install opensearch-py
 
 COPY lws-bytick /app
 COPY bytick-policy.json /app
