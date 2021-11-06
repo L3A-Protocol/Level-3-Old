@@ -38,10 +38,7 @@ s3 = boto3.resource(
     config=Config(signature_version='s3v4')
 )
 
-old_flush_timestamp = 0
-mutex = Lock()
 stop_it = False
-
 osclient = None
 data_index = None
 
@@ -75,6 +72,8 @@ class s3writer(object):
     def __init__(self):
         self.raw_lines = ''
         self.number_of_lines = 0
+        self.old_flush_timestamp = 0
+        self.mutex = Lock()
 
     def readline(self, fifo):
         line = ''
@@ -99,12 +98,12 @@ class s3writer(object):
     def process_raw_line(self, line):
         self.submit_line_to_opensearch(line)
 
-        mutex.acquire()
+        self.mutex.acquire()
         try:
             self.raw_lines = self.raw_lines + line
             self.number_of_lines += 1
         finally:
-            mutex.release()
+            self.mutex.release()
 
     def verify_feed_frequency (self, timestamp, period):
         global feed_interval
@@ -129,12 +128,12 @@ class s3writer(object):
 
     def flush_thread_function(self):
         global stop_it
-        global old_flush_timestamp
+        global s3
 
         if stop_it:
             return
 
-        mutex.acquire()
+        self.mutex.acquire()
         try:
             Timer(int(time()/60)*60+60 - time(), self.flush_thread_function).start ()
 
@@ -150,18 +149,17 @@ class s3writer(object):
             if self.raw_lines:
                 s3.Bucket(bucket_name).put_object(Key=f'{folders}{seq}', Body=self.raw_lines)
 
-            period = math.floor((utc_timestamp - old_flush_timestamp) * 1000)
+            period = math.floor((utc_timestamp - self.old_flush_timestamp) * 1000)
             self.verify_feed_frequency(seq, period)
-            old_flush_timestamp = utc_timestamp
+            self.old_flush_timestamp = utc_timestamp
 
             self.raw_lines = ''
             self.number_of_lines = 0
         finally:
-            mutex.release()
+            self.mutex.release()
 
     def run(self):
         global stop_it
-        global old_flush_timestamp
         global osclient
         global data_index
 
@@ -205,7 +203,7 @@ class s3writer(object):
             log.create ("ERROR", "Cannot create OpenSearch index")
             sys.exit()
 
-        old_flush_timestamp = get_current_timestamp()
+        self.old_flush_timestamp = get_current_timestamp()
 
         x = Thread(target=self.flush_thread_function, args=())
         x.start()
