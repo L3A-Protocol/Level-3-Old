@@ -9,9 +9,6 @@ TOPIC_BYBIT_OB200       = "orderBook_200.100ms.BTCUSD"
 TOPIC_BYBIT_TRADE       = "trade"
 
 class PriceBybit(PriceBase):
-    def __init__(self):
-        self.log = log_json()
-
     def verify_trade_structure(self, json_data):
         if not 'topic' in json_data:
             return False
