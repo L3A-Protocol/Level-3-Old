@@ -94,7 +94,7 @@ class Index(object):
 
         return response
 
-    def add_document(self, document):
+    def add_document(self, document, timestamp = None):
         response = None
 
         if not self.osclient.enabled:
@@ -103,8 +103,11 @@ class Index(object):
         self.id += 1
 
         try:
+            if not timestamp:
+                timestamp = datetime.datetime.utcnow().isoformat()
+
             data = {
-                "timestamp" : datetime.datetime.utcnow().isoformat(),
+                "timestamp" : timestamp,
                 "exchange"  : self.exchage,
                 "topic"     : self.topic,
                 "document"  : document

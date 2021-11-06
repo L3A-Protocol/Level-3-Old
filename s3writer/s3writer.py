@@ -94,40 +94,6 @@ def verify_feed_frequency (timestamp, number_of_lines, period):
         # Allert low feed frequency
         log.create("ERROR", 'Low feed frequency')
 
-def flush_thread_function():
-    global stop_it
-    global raw_lines
-    global number_of_lines
-    global old_flush_timestamp
-
-    if stop_it:
-        return
-
-    mutex.acquire()
-    try:
-        Timer(int(time()/60)*60+60 - time(), flush_thread_function).start ()
-
-        utc_timestamp = get_current_timestamp()
-
-        year = datetime.utcfromtimestamp(utc_timestamp).strftime('%Y')
-        month = datetime.utcfromtimestamp(utc_timestamp).strftime('%m')
-        day = datetime.utcfromtimestamp(utc_timestamp).strftime('%d')
-
-        seq = (int)(utc_timestamp * 1000000)
-
-        folders = s3_bucket_raw_data_folders(topic, year, month, day)
-        if raw_lines:
-            s3.Bucket(bucket_name).put_object(Key=f'{folders}{seq}', Body=raw_lines)
-
-        period = math.floor((utc_timestamp - old_flush_timestamp) * 1000)
-        verify_feed_frequency(seq, number_of_lines, period)
-        old_flush_timestamp = utc_timestamp
-
-        raw_lines = ''
-        number_of_lines = 0
-    finally:
-        mutex.release()
-
 class s3writer(object):
     def readline(self, fifo):
         line = ''
@@ -159,6 +125,40 @@ class s3writer(object):
         try:
             raw_lines = raw_lines + line
             number_of_lines += 1
+        finally:
+            mutex.release()
+
+    def flush_thread_function(self):
+        global stop_it
+        global raw_lines
+        global number_of_lines
+        global old_flush_timestamp
+
+        if stop_it:
+            return
+
+        mutex.acquire()
+        try:
+            Timer(int(time()/60)*60+60 - time(), self.flush_thread_function).start ()
+
+            utc_timestamp = get_current_timestamp()
+
+            year = datetime.utcfromtimestamp(utc_timestamp).strftime('%Y')
+            month = datetime.utcfromtimestamp(utc_timestamp).strftime('%m')
+            day = datetime.utcfromtimestamp(utc_timestamp).strftime('%d')
+
+            seq = (int)(utc_timestamp * 1000000)
+
+            folders = s3_bucket_raw_data_folders(topic, year, month, day)
+            if raw_lines:
+                s3.Bucket(bucket_name).put_object(Key=f'{folders}{seq}', Body=raw_lines)
+
+            period = math.floor((utc_timestamp - old_flush_timestamp) * 1000)
+            verify_feed_frequency(seq, number_of_lines, period)
+            old_flush_timestamp = utc_timestamp
+
+            raw_lines = ''
+            number_of_lines = 0
         finally:
             mutex.release()
 
@@ -210,7 +210,7 @@ class s3writer(object):
 
         old_flush_timestamp = get_current_timestamp()
 
-        x = Thread(target=flush_thread_function, args=())
+        x = Thread(target=self.flush_thread_function, args=())
         x.start()
 
         try:
