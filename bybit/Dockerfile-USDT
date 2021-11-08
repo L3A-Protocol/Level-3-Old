@@ -1,7 +1,6 @@
 FROM    gdafund/ubuntu-python
 
 RUN mkdir /app
-RUN pip3 install opensearch-py
 
 COPY lws-bybit /app
 COPY policy-usdt.json /app/policy.json
