@@ -1,5 +1,4 @@
 import os
-import uuid
 import datetime
 from opensearchpy import OpenSearch
 from dotenv import load_dotenv
@@ -61,9 +60,10 @@ class OpenSearchClient(object):
         return response
 
 class Index(object):
-    def __init__(self, client:OpenSearchClient, prefix:str, exchange:str, topic:str ):
+    def __init__(self, client:OpenSearchClient, prefix:str, exchange:str, topic:str, taskid:str ):
         self.osclient = client
-        self.name = f'{prefix}-{str(uuid.uuid4())}'
+        self.taskid = taskid
+        self.name = f'{prefix}-{taskid}'
         self.id = 0
         self.index_body = {
             'settings': {
@@ -110,6 +110,8 @@ class Index(object):
                 "timestamp" : timestamp,
                 "exchange"  : self.exchage,
                 "topic"     : self.topic,
+                "taskid"    : self.taskid,
+                "indexid"   : f'{self.exchage}-{self.topic}-{self.taskid}',
                 "document"  : document
             }
             response = self.osclient.client.index(
@@ -185,6 +187,8 @@ def test_it():
 
     print('\nDeleting index:')
     print(test_index.delete())
+
+    osclient.delete_index("")
 
 if __name__ == '__main__':
     test_it()

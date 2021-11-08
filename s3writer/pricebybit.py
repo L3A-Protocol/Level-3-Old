@@ -72,7 +72,7 @@ class PriceBybit(PriceBase):
 
 
     def process_json_data(self, topic:str, json_data):
-        retval = None
+        retval = []
 
         if TOPIC_BYBIT_INSURANCE    == topic:
             return retval
@@ -81,27 +81,21 @@ class PriceBybit(PriceBase):
                 symbol  = 'BTCUSD'
                 price   = float(entry["close"])
                 timestamp = int(json_data["timestamp_e6"]) / 1e3
-                retval = self.getJson(symbol=symbol, price=price, timestamp=timestamp)
-                # TODO: process all entries
-                break
+                retval.append(self.getJson(symbol=symbol, price=price, timestamp=timestamp))
         elif TOPIC_BYBIT_OB200      == topic and self.verify_ob200_structure(json_data):
             insert = json_data['data']['insert']
             for entry in insert:
                 symbol  = entry["symbol"]
                 price   = float(entry["price"])
                 timestamp = int(json_data["timestamp_e6"]) / 1e3
-                retval = self.getJson(symbol=symbol, price=price, timestamp=timestamp)
-                # TODO: process all entries
-                break
+                retval.append(self.getJson(symbol=symbol, price=price, timestamp=timestamp))
         elif TOPIC_BYBIT_TRADE      == topic and self.verify_trade_structure(json_data):
             data = json_data['data']
             for entry in data:
                 symbol  = entry["symbol"]
                 price   = float(entry["price"])
                 timestamp = int(entry["trade_time_ms"])
-                retval = self.getJson(symbol=symbol, price=price, timestamp=timestamp)
-                # TODO: process all entries
-                break
+                retval.append(self.getJson(symbol=symbol, price=price, timestamp=timestamp))
 
         return retval
 

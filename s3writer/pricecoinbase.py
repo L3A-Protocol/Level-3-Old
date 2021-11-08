@@ -9,7 +9,7 @@ TOPIC_COINBASE_ETHUSD   = "ETH-USD"
 class PriceCoinbase(PriceBase):
 
     def process_json_data(self, topic:str, json_data):
-        retval = None
+        retval = []
 
         if TOPIC_COINBASE_BTCUSD    == topic:
             pass

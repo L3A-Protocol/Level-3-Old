@@ -10,7 +10,7 @@ TOPIC_BYBIT_USDT_TRADE  = "trade.BTCUSDT"
 class PriceBybitUSDT(PriceBase):
 
     def process_json_data(self, topic:str, json_data):
-        retval = None
+        retval = []
 
         if TOPIC_BYBIT_USDT_CANDLE    == topic:
             pass

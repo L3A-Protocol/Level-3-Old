@@ -2,6 +2,8 @@ import os
 import sys
 import errno
 import signal
+import uuid
+
 from dotenv import load_dotenv
 from osbot_utils.utils.Files import file_exists
 from osbot_utils.utils.Json import str_to_json
@@ -16,8 +18,8 @@ from threading import Timer, Thread, Lock
 from time import time
 
 from log_json import log_json
-
 from opensearchclient import OpenSearchClient, Index
+from priceinfo import PriceInfo
 
 # Variables
 
@@ -40,7 +42,7 @@ s3 = boto3.resource(
 
 stop_it = False
 osclient = None
-data_index = None
+price_index = None
 
 # Functions
 
@@ -52,8 +54,8 @@ def handler(signum, frame):
     print("==> Stopping the application. Please allow some time for the theads to finish up gracefully")
     print("")
 
-    if osclient and osclient.enabled and data_index:
-        osclient.delete_index(data_index.name)
+    if osclient and osclient.enabled and price_index:
+        osclient.delete_index(price_index.name)
 
     sys.exit()
 
@@ -74,6 +76,8 @@ class s3writer(object):
         self.number_of_lines = 0
         self.old_flush_timestamp = 0
         self.mutex = Lock()
+        self.taskid = uuid.uuid4()
+        self.priceinfo = PriceInfo()
 
     def readline(self, fifo):
         line = ''
@@ -87,11 +91,13 @@ class s3writer(object):
         return line
 
     def submit_line_to_opensearch(self, line):
-        global data_index
+        global price_index
 
         try:
-            document = str_to_json(line)
-            assert data_index.add_document(document=document)
+            price_data = self.priceinfo.process_raw_data(exchange=exchange, topic=topic, data=line)
+            for item in price_data:
+                if 'timestamp' in item:
+                    price_index.add_document(document=item)
         except Exception as ex:
             print(ex)
 
@@ -161,7 +167,7 @@ class s3writer(object):
     def run(self):
         global stop_it
         global osclient
-        global data_index
+        global price_index
 
         log = log_json()
 
@@ -198,15 +204,12 @@ class s3writer(object):
             log.create ("ERROR", "Cannot access the OpenSearch host")
             sys.exit()
 
-        data_index = Index(osclient, 'data', exchange=exchange, topic=topic)
-        if not data_index.create():
+        price_index = Index(osclient, 'price', exchange=exchange, topic=topic, taskid=self.taskid)
+        if not price_index.create():
             log.create ("ERROR", "Cannot create OpenSearch index")
             sys.exit()
 
         self.old_flush_timestamp = get_current_timestamp()
-
-        x = Thread(target=self.flush_thread_function, args=())
-        x.start()
 
         try:
             os.system(f'{c_bin_path} --topic {topic} &')
@@ -223,10 +226,13 @@ class s3writer(object):
                 log.create ("ERROR", f"Failed to create the pipe: {FIFO}")
                 sys.exit()
 
+        data_thread = Thread(target=self.flush_thread_function, args=())
+        data_thread.start()
+
         with open(FIFO) as fifo:
             while True:
                 if stop_it:
-                    sys.exit()
+                    break
 
                 line = self.readline(fifo)
 
@@ -239,6 +245,8 @@ class s3writer(object):
                 except Exception as ex:
                     log.create ('ERROR', f'process_raw_line: {ex}')
                     continue
+
+        data_thread.join()
 
 if __name__ == '__main__':
     signal.signal(signal.SIGINT, handler)
