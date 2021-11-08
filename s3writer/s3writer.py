@@ -97,6 +97,7 @@ class s3writer(object):
             price_data = self.priceinfo.process_raw_data(exchange=exchange, topic=topic, data=line)
             for item in price_data:
                 if 'timestamp' in item:
+                    # price_index.add_document(document=item, timestamp=item['timestamp'])
                     price_index.add_document(document=item)
         except Exception as ex:
             print(ex)

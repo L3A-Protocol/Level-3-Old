@@ -1,4 +1,5 @@
-import datetime
+from datetime import datetime
+from datetime import timezone
 from log_json import log_json
 from osbot_utils.utils.Json import str_to_json
 from pricebybit import PriceBybit, TOPIC_BYBIT_INSURANCE, TOPIC_BYBIT_KLINE, TOPIC_BYBIT_OB200, TOPIC_BYBIT_TRADE
@@ -16,7 +17,7 @@ class PriceInfo(object):
         self.log = log_json()
 
     def getJson(self, symbol:str, price:float, timestamp:int):
-        date = datetime.datetime.fromtimestamp(timestamp / 1e3).isoformat()
+        date = datetime.fromtimestamp(timestamp / 1e3).isoformat().replace(timezone.utc)
         return {
             "symbol"    : symbol,
             "price"     : price,
