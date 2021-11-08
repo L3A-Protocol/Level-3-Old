@@ -20,6 +20,7 @@ from time import time
 from log_json import log_json
 from opensearchclient import OpenSearchClient, Index
 from priceinfo import PriceInfo
+from sysinfo import SysInfo
 
 # Variables
 
@@ -227,6 +228,9 @@ class s3writer(object):
                 log.create ("ERROR", f"Failed to create the pipe: {FIFO}")
                 sys.exit()
 
+        sys_info = SysInfo(osclient, exchange, topic, self.taskid)
+        sys_info.Start()
+
         data_thread = Thread(target=self.flush_thread_function, args=())
         data_thread.start()
 
@@ -248,6 +252,8 @@ class s3writer(object):
                     continue
 
         data_thread.join()
+        sys_info.Stop()
+
 
 if __name__ == '__main__':
     signal.signal(signal.SIGINT, handler)
