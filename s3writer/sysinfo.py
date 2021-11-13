@@ -3,6 +3,7 @@ import psutil
 from time import time
 from threading import Timer, Thread, Lock
 from opensearchclient import OpenSearchClient, Index
+from collections import Counter
 
 RUN_INTREVAL = 3
 
@@ -13,7 +14,7 @@ class SysInfo(object):
         self.stopped = False
         self.thread = None
         self.mutex = Lock()
-        # self.netcounters = None
+        self.netcounters = None
 
     def thread_function(self):
         self.mutex.acquire()
@@ -21,13 +22,15 @@ class SysInfo(object):
             if not self.stopped: Timer(int(time()/RUN_INTREVAL)*RUN_INTREVAL+RUN_INTREVAL - time(), self.thread_function).start ()
             cpu_usage = psutil.cpu_percent()
             ram_usage = psutil.virtual_memory()[2]
-            # bytes_sent = 0
-            # bytes_recv = 0
+            netcounters = psutil.net_io_counters()._asdict()
+            net_usage = Counter(netcounters)
+            net_usage.subtract(self.netcounters)
+            self.netcounters = netcounters
 
             data = {
                 "CPU": cpu_usage,
                 "RAM": ram_usage,
-                "NET": psutil.net_io_counters()
+                "NET": dict(net_usage)
             }
 
             self.index.add_document(data)
