@@ -30,7 +30,7 @@ class GdaAwsCdkStack(cdk.Stack):
 
         cluster = ecs.Cluster(self, "GDADataLakeCluster", vpc=vpc)
 
-        binance_construct       = BinanceConstruct(self, "binance-service", bucket=bucket, cluster=cluster)
+        # binance_construct       = BinanceConstruct(self, "binance-service", bucket=bucket, cluster=cluster)
 
         bybit_orderbook_200     = BybitConstruct(self, 'bybit-orderbook-200-service',
                                     bucket=bucket,
@@ -38,57 +38,57 @@ class GdaAwsCdkStack(cdk.Stack):
                                     topic="orderBook_200.100ms.BTCUSD"
                                 )
 
-        bybit_insurance         = BybitConstruct(self, 'bybit-insurance-service',
-                                    bucket=bucket,
-                                    cluster=cluster,
-                                    topic="insurance"
-                                )
+        # bybit_insurance         = BybitConstruct(self, 'bybit-insurance-service',
+        #                             bucket=bucket,
+        #                             cluster=cluster,
+        #                             topic="insurance"
+        #                         )
 
-        bybit_trade             = BybitConstruct(self, 'bybit-trade-service',
-                                    bucket=bucket,
-                                    cluster=cluster,
-                                    topic="trade"
-                                )
+        # bybit_trade             = BybitConstruct(self, 'bybit-trade-service',
+        #                             bucket=bucket,
+        #                             cluster=cluster,
+        #                             topic="trade"
+        #                         )
 
-        bybit_klinev21          = BybitConstruct(self, 'bybit-klinev21-service',
-                                    bucket=bucket,
-                                    cluster=cluster,
-                                    topic="klineV2.1.BTCUSD"
-                                )
+        # bybit_klinev21          = BybitConstruct(self, 'bybit-klinev21-service',
+        #                             bucket=bucket,
+        #                             cluster=cluster,
+        #                             topic="klineV2.1.BTCUSD"
+        #                         )
 
-        bybitusdt_orderbook_200 = BybitUSDTConstruct(self, "bybitusdt-orderbook-200",
-                                    bucket=bucket,
-                                    cluster=cluster,
-                                    topic="orderBook_200.100ms.BTCUSDT"
-                                )
+        # bybitusdt_orderbook_200 = BybitUSDTConstruct(self, "bybitusdt-orderbook-200",
+        #                             bucket=bucket,
+        #                             cluster=cluster,
+        #                             topic="orderBook_200.100ms.BTCUSDT"
+        #                         )
 
-        bybitusdt_trade         = BybitUSDTConstruct(self, "bybitusdt-trade",
-                                    bucket=bucket,
-                                    cluster=cluster,
-                                    topic="trade.BTCUSDT"
-                                )
+        # bybitusdt_trade         = BybitUSDTConstruct(self, "bybitusdt-trade",
+        #                             bucket=bucket,
+        #                             cluster=cluster,
+        #                             topic="trade.BTCUSDT"
+        #                         )
 
-        bybitusdt_candle        = BybitUSDTConstruct(self, "bybitusdt-candle",
-                                    bucket=bucket,
-                                    cluster=cluster,
-                                    topic="candle.1.BTCUSDT"
-                                )
+        # bybitusdt_candle        = BybitUSDTConstruct(self, "bybitusdt-candle",
+        #                             bucket=bucket,
+        #                             cluster=cluster,
+        #                             topic="candle.1.BTCUSDT"
+        #                         )
 
-        coinbase_ethusd         = CoinbaseConstruct(self, "coinbase-ethusd",
-                                    bucket=bucket,
-                                    cluster=cluster,
-                                    topic="ETH-USD"
-                                )
+        # coinbase_ethusd         = CoinbaseConstruct(self, "coinbase-ethusd",
+        #                             bucket=bucket,
+        #                             cluster=cluster,
+        #                             topic="ETH-USD"
+        #                         )
 
-        coinbase_btcusd         = CoinbaseConstruct(self, "coinbase-btcusd",
-                                    bucket=bucket,
-                                    cluster=cluster,
-                                    topic="BTC-USD"
-                                )
+        # coinbase_btcusd         = CoinbaseConstruct(self, "coinbase-btcusd",
+        #                             bucket=bucket,
+        #                             cluster=cluster,
+        #                             topic="BTC-USD"
+        #                         )
 
-        task_switcher_lambda = _lambda.Function(
-            self, 'TaskSwitcher',
-            runtime=_lambda.Runtime.PYTHON_3_7,
-            code=_lambda.Code.from_asset('lambda'),
-            handler='task_switcher.handler',
-        )
+        # task_switcher_lambda = _lambda.Function(
+        #     self, 'TaskSwitcher',
+        #     runtime=_lambda.Runtime.PYTHON_3_7,
+        #     code=_lambda.Code.from_asset('lambda'),
+        #     handler='task_switcher.handler',
+        # )

@@ -14,7 +14,9 @@ class ExchangeBase(cdk.Construct):
                 repo_arn:str,
                 bucket:s3.Bucket,
                 cluster:ecs.Cluster,
-                topic: str, **kwargs):
+                topic: str,
+                feed_interval='100',
+                **kwargs):
         super().__init__(scope, id, **kwargs)
 
         service_prefix = exchnage_name.lower()
@@ -31,15 +33,24 @@ class ExchangeBase(cdk.Construct):
         repo = ecr.Repository.from_repository_arn(self, f'{service_prefix}-repo', repo_arn)
 
         image = ecs.ContainerImage.from_ecr_repository(repo)
-        access_key_id       = os.environ["EXCHANGE_ACCESS_KEY_ID"]
-        access_secret_key   = os.environ["EXCHANGE_SECRET_ACCESS_KEY"]
+        access_key_id           = os.environ["EXCHANGE_ACCESS_KEY_ID"]
+        access_secret_key       = os.environ["EXCHANGE_SECRET_ACCESS_KEY"]
+        opensearch_host         = os.environ["OPENSEARCH_HOST"]
+        opensearch_port         = '443'
+        opensearch_user         = os.environ["OPENSEARCH_USER"]
+        opensearch_password     = os.environ["OPENSEARCH_PASSWORD"]
+
         environment = {
-                    "EXCHANGE": exchnage_name,
-                    "C_BINARY_PATH": binary_path,
-                    "TOPIC": topic,
-                    "AWS_ACCESS_KEY_ID": access_key_id,
-                    "AWS_SECRET_ACCESS_KEY": access_secret_key,
-                    "BUCKET_NAME": bucket.bucket_name
+                    "EXCHANGE"                  : exchnage_name,
+                    "C_BINARY_PATH"             : binary_path,
+                    "TOPIC"                     : topic,
+                    "AWS_ACCESS_KEY_ID"         : access_key_id,
+                    "AWS_SECRET_ACCESS_KEY"     : access_secret_key,
+                    "BUCKET_NAME"               : bucket.bucket_name,
+                    "OPENSEARCH_HOST"           : opensearch_host,
+                    "OPENSEARCH_PORT"           : opensearch_port,
+                    "OPENSEARCH_USER"           : opensearch_user,
+                    "OPENSEARCH_PASSWORD"       : opensearch_password,
                 }
         
         logDetail = logs.LogGroup(self, log_id, log_group_name=log_group_name, retention=logs.RetentionDays.SIX_MONTHS, removal_policy=cdk.RemovalPolicy.DESTROY)
