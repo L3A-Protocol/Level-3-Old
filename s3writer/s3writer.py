@@ -67,7 +67,7 @@ def get_current_timestamp():
     return utc_time.timestamp()
 
 def s3_bucket_folders(data, _symbol, year, month, day):
-    return f'true-alpha/exchange={exchange}/{data}/symbol={symbol}/year={str(year)}/month={str(month)}/day={str(day)}/'
+    return f'true-alpha/exchange={exchange}/{data}/symbol={_symbol}/year={str(year)}/month={str(month)}/day={str(day)}/'
 
 def s3_bucket_raw_data_folders(topic, _symbol, year, month, day):
     return f'raw-data/exchange={exchange}/{topic}/symbol={_symbol}/year={str(year)}/month={str(month)}/day={str(day)}/'
@@ -90,7 +90,9 @@ class s3writer(object):
                     break
         except:
             pass
-        return line
+        if symbol in line:
+            return line
+        return ''
 
     def get_c_module_topic(self):
         retval = topic
@@ -253,7 +255,6 @@ class s3writer(object):
                 line = self.readline(fifo)
 
                 if not line:
-                    log.create("ERROR", "No line in FIFO")
                     continue
 
                 try:
