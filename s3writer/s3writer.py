@@ -28,11 +28,12 @@ load_dotenv(override=True)
 exchange    = os.getenv("EXCHANGE", None)
 c_bin_path  = os.getenv("C_BINARY_PATH", None)
 topic       = os.getenv("TOPIC", None)
+symbol      = os.getenv("SYMBOL", None)
 bucket_name = os.getenv("BUCKET_NAME", None)
 
 access_key_id       = os.getenv("AWS_ACCESS_KEY_ID", None)
 access_secret_key   = os.getenv("AWS_SECRET_ACCESS_KEY", None)
-feed_interval       = int(os.getenv("FEED_INTERVAL", 100))
+feed_interval       = int(os.getenv("FEED_INTERVAL", 60000))
 
 s3 = boto3.resource(
     's3',
@@ -66,10 +67,10 @@ def get_current_timestamp():
     return utc_time.timestamp()
 
 def s3_bucket_folders(data, _symbol, year, month, day):
-    return f'true-alpha/exchange={exchange}/{data}/symbol={_symbol}/year={str(year)}/month={str(month)}/day={str(day)}/'
+    return f'true-alpha/exchange={exchange}/{data}/symbol={symbol}/year={str(year)}/month={str(month)}/day={str(day)}/'
 
-def s3_bucket_raw_data_folders(topic, year, month, day):
-    return f'raw-data/exchange={exchange}/{topic}/year={str(year)}/month={str(month)}/day={str(day)}/'
+def s3_bucket_raw_data_folders(topic, _symbol, year, month, day):
+    return f'raw-data/exchange={exchange}/{topic}/symbol={_symbol}/year={str(year)}/month={str(month)}/day={str(day)}/'
 
 class s3writer(object):
     def __init__(self):
@@ -91,10 +92,17 @@ class s3writer(object):
             pass
         return line
 
+    def get_c_module_topic(self):
+        retval = topic
+        if 'orderBook_200.100ms' == topic:
+            retval = f'{topic}.{symbol}'
+        return retval
+
     def submit_line_to_opensearch(self, line):
         global price_index
 
         try:
+            # price_data = self.priceinfo.process_raw_data(exchange=exchange, topic=self.get_c_module_topic(), data=line)
             price_data = self.priceinfo.process_raw_data(exchange=exchange, topic=topic, data=line)
             for item in price_data:
                 if 'timestamp' in item:
@@ -153,7 +161,7 @@ class s3writer(object):
 
             seq = (int)(utc_timestamp * 1000000)
 
-            folders = s3_bucket_raw_data_folders(topic, year, month, day)
+            folders = s3_bucket_raw_data_folders(topic, symbol, year, month, day)
             if self.raw_lines:
                 s3.Bucket(bucket_name).put_object(Key=f'{folders}{seq}', Body=self.raw_lines)
 
@@ -185,6 +193,10 @@ class s3writer(object):
             log.create ("ERROR", "The topic is not specified")
             sys.exit()
 
+        if not symbol:
+            log.create ("ERROR", "The symbol is not specified")
+            sys.exit()
+
         if not bucket_name:
             log.create ("ERROR" "The bucket_name is not specified")
             sys.exit()
@@ -214,6 +226,7 @@ class s3writer(object):
         self.old_flush_timestamp = get_current_timestamp()
 
         try:
+            # os.system(f'{c_bin_path} --topic {self.get_c_module_topic()} &')
             os.system(f'{c_bin_path} --topic {topic} &')
         except OSError as oe:
             if oe.errno != errno.EEXIST:
