@@ -102,8 +102,7 @@ class s3writer(object):
         global price_index
 
         try:
-            # price_data = self.priceinfo.process_raw_data(exchange=exchange, topic=self.get_c_module_topic(), data=line)
-            price_data = self.priceinfo.process_raw_data(exchange=exchange, topic=topic, data=line)
+            price_data = self.priceinfo.process_raw_data(exchange=exchange, topic=self.get_c_module_topic(), data=line)
             for item in price_data:
                 if 'timestamp' in item:
                     # price_index.add_document(document=item, timestamp=item['timestamp'])
@@ -226,14 +225,13 @@ class s3writer(object):
         self.old_flush_timestamp = get_current_timestamp()
 
         try:
-            # os.system(f'{c_bin_path} --topic {self.get_c_module_topic()} &')
-            os.system(f'{c_bin_path} --topic {topic} &')
+            os.system(f'{c_bin_path} --topic {self.get_c_module_topic()} &')
         except OSError as oe:
             if oe.errno != errno.EEXIST:
                 log.create ('ERROR', f'Failed to start {c_bin_path}')
                 sys.exit()
 
-        FIFO = f'/tmp/{topic}'
+        FIFO = f'/tmp/{self.get_c_module_topic()}'
         try:
             os.mkfifo(FIFO)
         except OSError as oe:
