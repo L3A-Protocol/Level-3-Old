@@ -53,6 +53,8 @@ dkms.conf
 
 ws-echo/*
 
+.dccache
+
 s3writer/__pycache__/*
 s3writer/.env
 
