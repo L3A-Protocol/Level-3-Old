@@ -80,6 +80,8 @@ class s3writer(object):
         self.mutex = Lock()
         self.taskid = uuid.uuid4()
         self.priceinfo = PriceInfo()
+        self.verification_string = self.get_verification_string()
+        self.topic_argument = self.get_topic_argument()
 
     def readline(self, fifo):
         line = ''
@@ -90,21 +92,29 @@ class s3writer(object):
                     break
         except:
             pass
-        if symbol in line:
+        if self.verification_string in line:
             return line
         return ''
 
-    def get_c_module_topic(self):
-        retval = topic
-        if 'orderBook_200.100ms' == topic:
-            retval = f'{topic}.{symbol}'
-        return retval
+    def get_verification_string(self):
+        if 'ByBit' == exchange:
+            if 'orderBook_200.100ms' == topic:
+                return f'"{topic}.{symbol}"'
+            if 'trade' == topic:
+                return f'"{topic}.{symbol}"'
+        return f'{symbol}'
+
+    def get_topic_argument(self):
+        if 'ByBit' == exchange:
+            if 'orderBook_200.100ms' == topic:
+                return f'{topic}.{symbol}'
+        return topic
 
     def submit_line_to_opensearch(self, line):
         global price_index
 
         try:
-            price_data = self.priceinfo.process_raw_data(exchange=exchange, topic=self.get_c_module_topic(), data=line)
+            price_data = self.priceinfo.process_raw_data(exchange=exchange, topic=self.topic_argument, data=line)
             for item in price_data:
                 if 'timestamp' in item:
                     # price_index.add_document(document=item, timestamp=item['timestamp'])
@@ -227,13 +237,13 @@ class s3writer(object):
         self.old_flush_timestamp = get_current_timestamp()
 
         try:
-            os.system(f'{c_bin_path} --topic {self.get_c_module_topic()} &')
+            os.system(f'{c_bin_path} --topic {self.topic_argument} &')
         except OSError as oe:
             if oe.errno != errno.EEXIST:
                 log.create ('ERROR', f'Failed to start {c_bin_path}')
                 sys.exit()
 
-        FIFO = f'/tmp/{self.get_c_module_topic()}'
+        FIFO = f'/tmp/{self.topic_argument}'
         try:
             os.mkfifo(FIFO)
         except OSError as oe:
