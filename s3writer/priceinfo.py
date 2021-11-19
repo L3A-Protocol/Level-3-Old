@@ -1,3 +1,5 @@
+import sys
+
 from datetime import datetime
 from datetime import timezone
 from log_json import log_json
@@ -13,8 +15,18 @@ EX_BINANCE      = "Binanace"
 EX_COINBASE     = "Coinbase"
 
 class PriceInfo(object):
-    def __init__(self):
+    def __init__(self, exchange):
         self.log = log_json()
+        self.process_json_data = None
+
+        if EX_BYBIT         == exchange:        self.process_json_data = PriceBybit().process_json_data
+        if EX_BYBIT_USDT    == exchange:        self.process_json_data = PriceBybitUSDT().process_json_data
+        if EX_COINBASE      == exchange:        self.process_json_data = PriceCoinbase().process_json_data
+        if EX_BINANCE       == exchange:        self.process_json_data = PriceBinance().process_json_data
+
+        if not self.process_json_data:
+            print('Failed to initialize PriceInfo object')
+            sys.exit()
 
     def getJson(self, symbol:str, price:float, timestamp:int):
         date = datetime.fromtimestamp(timestamp / 1e3).isoformat().replace(timezone.utc)
@@ -32,17 +44,11 @@ class PriceInfo(object):
             self.log.create("ERROR", str(ex))
             return(None)
 
-        if EX_BYBIT         == exchange:        return PriceBybit().process_json_data(topic=topic, json_data=json_data)
-        if EX_BYBIT_USDT    == exchange:        return PriceBybitUSDT().process_json_data(topic=topic, json_data=json_data)
-        if EX_COINBASE      == exchange:        return PriceCoinbase().process_json_data(topic=topic, json_data=json_data)
-        if EX_BINANCE       == exchange:        return PriceBinance().process_json_data(topic=topic, json_data=json_data)
-
-        self.log.create("ERROR", f'{exchange} EXCHANGE NOT SUPPOTED')
-        return None
+        return self.process_json_data(topic=topic, json_data=json_data)
 
 if __name__ == '__main__':
-    info = PriceInfo()
 
+    info = PriceInfo(EX_BYBIT)
     raw_data = "{\"topic\":\"insurance.ETH\",\"data\":[{\"currency\":\"ETH\",\"timestamp\":\"2021-10-15T20:00:00Z\",\"wallet_balance\":4832029953542}]}"
     print(info.process_raw_data(EX_BYBIT,TOPIC_BYBIT_INSURANCE,raw_data))
     raw_data = "{\"topic\":\"klineV2.1.BTCUSD\",\"data\":[{\"start\":1636174500,\"end\":1636174560,\"open\":61271,\"close\":61271,\"high\":61271,\"low\":61270.5,\"volume\":32951,\"turnover\":0.5377931700000002,\"timestamp\":1636174529019904,\"confirm\":false,\"cross_seq\":10550389298}],\"timestamp_e6\":1636174529026740}\n"
@@ -52,6 +58,7 @@ if __name__ == '__main__':
     raw_data = "{\"topic\":\"trade.XRPUSD\",\"data\":[{\"trade_time_ms\":1634342763132,\"timestamp\":\"2021-10-16T00:06:03.000Z\",\"symbol\":\"XRPUSD\",\"side\":\"Sell\",\"size\":1094,\"price\":1.1441,\"tick_direction\":\"MinusTick\",\"trade_id\":\"a6aa635a-89f7-5fd5-a29d-df9f0b13d937\",\"cross_seq\":3780829306},{\"trade_time_ms\":1634342763132,\"timestamp\":\"2021-10-16T00:06:03.000Z\",\"symbol\":\"XRPUSD\",\"side\":\"Sell\",\"size\":200,\"price\":1.1441,\"tick_direction\":\"ZeroMinusTick\",\"trade_id\":\"ea2dcc4c-26f4-5a19-ba7b-2fc187b9b37b\",\"cross_seq\":3780829306},{\"trade_time_ms\":1634342763132,\"timestamp\":\"2021-10-16T00:06:03.000Z\",\"symbol\":\"XRPUSD\",\"side\":\"Sell\",\"size\":4,\"price\":1.1441,\"tick_direction\":\"ZeroMinusTick\",\"trade_id\":\"aeaeaa83-79cb-5f80-887f-9e527153b6fb\",\"cross_seq\":3780829306},{\"trade_time_ms\":1634342763132,\"timestamp\":\"2021-10-16T00:06:03.000Z\",\"symbol\":\"XRPUSD\",\"side\":\"Sell\",\"size\":9735,\"price\":1.1439,\"tick_direction\":\"MinusTick\",\"trade_id\":\"b3942a44-639c-5365-a82b-7ac67dd097e4\",\"cross_seq\":3780829306}]}"
     print(info.process_raw_data(EX_BYBIT,TOPIC_BYBIT_TRADE,raw_data))
 
+    info = PriceInfo(EX_BYBIT_USDT)
     raw_data = "{\"key\":\"none\"}"
     print(info.process_raw_data(EX_BYBIT_USDT,TOPIC_BYBIT_USDT_CANDLE,raw_data))
     raw_data = "{\"key\":\"none\"}"
@@ -59,10 +66,12 @@ if __name__ == '__main__':
     raw_data = "{\"key\":\"none\"}"
     print(info.process_raw_data(EX_BYBIT_USDT,TOPIC_BYBIT_USDT_TRADE,raw_data))
 
+    info = PriceInfo(EX_COINBASE)
     raw_data = "{\"key\":\"none\"}"
     print(info.process_raw_data(EX_COINBASE,TOPIC_COINBASE_BTCUSD,raw_data))
     raw_data = "{\"key\":\"none\"}"
     print(info.process_raw_data(EX_COINBASE,TOPIC_COINBASE_ETHUSD,raw_data))
 
+    info = PriceInfo(EX_BINANCE)
     raw_data = "{\"stream\":\"btcusdt@aggTrade\",\"data\":{\"e\":\"aggTrade\",\"E\":1634390640539,\"a\":874355956,\"s\":\"BTCUSDT\",\"p\":\"60602.22\",\"q\":\"0.002\",\"f\":1546375311,\"l\":1546375311,\"T\":1634390640533,\"m\":false}}"
     print(info.process_raw_data(EX_BINANCE,TOPIC_BINANCE_BINANCE,raw_data))
