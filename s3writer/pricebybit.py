@@ -11,6 +11,16 @@ TOPIC_BYBIT_TRADE       = "trade"
 class PriceBybit(PriceBase):
     def __init__(self, topic):
         self.topic = topic
+        self.process_topic_data = self.process_none
+
+        if TOPIC_BYBIT_INSURANCE    == topic:
+            self.process_topic_data = self.process_none
+        elif TOPIC_BYBIT_KLINE      == topic:
+            self.process_topic_data = self.process_kline
+        elif TOPIC_BYBIT_OB200      == topic:
+            self.process_topic_data = self.process_ob200
+        elif TOPIC_BYBIT_TRADE      == topic:
+            self.process_topic_data = self.process_trade
 
     def verify_trade_structure(self, json_data):
         if not 'topic' in json_data:
@@ -73,6 +83,9 @@ class PriceBybit(PriceBase):
 
         return True
 
+    def process_none(self, json_data):
+        return []
+
     def process_kline(self, json_data):
         retval = []
         for entry in json_data['data']:
@@ -109,18 +122,7 @@ class PriceBybit(PriceBase):
         return retval
 
     def process_json_data(self, topic:str, json_data):
-        retval = []
-
-        if TOPIC_BYBIT_INSURANCE    == topic:
-            return retval
-        elif TOPIC_BYBIT_KLINE      == topic:
-            retval += self.process_kline(json_data)
-        elif TOPIC_BYBIT_OB200      == topic:
-            retval += self.process_ob200(json_data)
-        elif TOPIC_BYBIT_TRADE      == topic:
-            retval += self.process_trade(json_data)
-
-        return retval
+        return self.process_topic_data(json_data)
 
 if __name__ == '__main__':
     info = PriceBybit()

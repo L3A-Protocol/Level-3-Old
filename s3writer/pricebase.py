@@ -14,3 +14,6 @@ class PriceBase(object):
             "timestamp" : date
         }
 
+    def process_json_data(self, topic:str, json_data):
+        return []
+
