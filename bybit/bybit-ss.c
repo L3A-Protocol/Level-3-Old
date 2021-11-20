@@ -150,22 +150,23 @@ bybit_receive_callback(void *userobj, const uint8_t *in, size_t len, int flags)
 	// lwsl_debug("%s", in);
 	if (fifo_descriptor >= 0) // the fifo is valid
 	{
-		int cap = fcntl(fifo_descriptor, F_GETPIPE_SZ);
-		int line_len = strlen(in);
+		// int cap = fcntl(fifo_descriptor, F_GETPIPE_SZ);
+		// int line_len = strlen(in);
 
-		if (line_len >= 4096)
-		{
-			lwsl_user("Long line: %d \n", line_len);
-			return LWSSSSRET_OK;
-		}
+		// if (line_len >= 4096)
+		// {
+		// 	lwsl_user("Long line: %d \n", line_len);
+		// 	return LWSSSSRET_OK;
+		// }
 
-		if (line_len + 2 < cap)
-		{
-			write(fifo_descriptor, in, strlen(in));
-			write(fifo_descriptor, "\n", 1);
-		}
+		// if (line_len + 2 < cap)
+		// {
+		// 	write(fifo_descriptor, in, strlen(in));
+		// 	write(fifo_descriptor, "\n", 1);
+		// }
 
-		// lwsl_user("Room in pipe: %d %d \n", cap, line_len + 2);
+		write(fifo_descriptor, in, strlen(in));
+		write(fifo_descriptor, "\n", 1);
 
 	}
 
