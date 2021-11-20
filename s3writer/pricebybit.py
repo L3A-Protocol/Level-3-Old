@@ -84,6 +84,9 @@ class PriceBybit(PriceBase):
 
     def process_ob200(self, json_data):
         retval = []
+        if not self.verify_ob200_structure(json_data):
+            return retval
+
         insert = json_data['data']['insert']
         for entry in insert:
             symbol  = entry["symbol"]
@@ -94,6 +97,9 @@ class PriceBybit(PriceBase):
 
     def process_trade(self, json_data):
         retval = []
+        if not  self.verify_trade_structure(json_data):
+            return retval
+
         data = json_data['data']
         for entry in data:
             symbol  = entry["symbol"]
@@ -109,9 +115,9 @@ class PriceBybit(PriceBase):
             return retval
         elif TOPIC_BYBIT_KLINE      == topic:
             retval += self.process_kline(json_data)
-        elif TOPIC_BYBIT_OB200      == topic and self.verify_ob200_structure(json_data):
+        elif TOPIC_BYBIT_OB200      == topic:
             retval += self.process_ob200(json_data)
-        elif TOPIC_BYBIT_TRADE      == topic and self.verify_trade_structure(json_data):
+        elif TOPIC_BYBIT_TRADE      == topic:
             retval += self.process_trade(json_data)
 
         return retval
