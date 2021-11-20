@@ -102,6 +102,10 @@ class s3writer(object):
                 return f'"{topic}.{symbol}"'
             if 'trade' == topic:
                 return f'"{topic}.{symbol}"'
+            if 'klineV2.1' == topic:
+                return f'"{topic}.{symbol}"'
+            if 'insurance' == topic:
+                return f'"{topic}.{symbol}"'
         return f'{symbol}'
 
     def get_topic_argument(self):
