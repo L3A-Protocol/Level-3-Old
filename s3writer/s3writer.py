@@ -79,7 +79,7 @@ class s3writer(object):
         self.old_flush_timestamp = 0
         self.mutex = Lock()
         self.taskid = uuid.uuid4()
-        self.priceinfo = PriceInfo(exchange, symbol)
+        self.priceinfo = PriceInfo(exchange, topic, symbol)
         self.verification_string = self.get_verification_string()
         self.topic_argument = self.get_topic_argument()
 
@@ -114,7 +114,7 @@ class s3writer(object):
         global price_index
 
         try:
-            price_data = self.priceinfo.process_raw_data(exchange=exchange, topic=self.topic_argument, data=line)
+            price_data = self.priceinfo.process_raw_data(exchange=exchange, data=line)
             for item in price_data:
                 if 'timestamp' in item:
                     # price_index.add_document(document=item, timestamp=item['timestamp'])

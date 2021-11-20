@@ -9,9 +9,10 @@ TOPIC_BYBIT_OB200       = "orderBook_200.100ms"
 TOPIC_BYBIT_TRADE       = "trade"
 
 class PriceBybit(PriceBase):
-    def __init__(self, topic):
+    def __init__(self, topic, symbol):
         self.log = log_json()
         self.topic = topic
+        self.symbol = symbol
         self.process_json_data = self.process_none
 
         if TOPIC_BYBIT_INSURANCE    == topic:
@@ -87,10 +88,9 @@ class PriceBybit(PriceBase):
     def process_kline(self, json_data):
         retval = []
         for entry in json_data['data']:
-            symbol  = 'BTCUSD'
             price   = float(entry["close"])
             timestamp = int(json_data["timestamp_e6"]) / 1e3
-            retval.append(self.getJson(symbol=symbol, price=price, timestamp=timestamp))
+            retval.append(self.getJson(symbol=self.symbol, price=price, timestamp=timestamp))
         return retval
 
     def process_ob200(self, json_data):
@@ -100,10 +100,9 @@ class PriceBybit(PriceBase):
 
         insert = json_data['data']['insert']
         for entry in insert:
-            symbol  = entry["symbol"]
             price   = float(entry["price"])
             timestamp = int(json_data["timestamp_e6"]) / 1e3
-            retval.append(self.getJson(symbol=symbol, price=price, timestamp=timestamp))
+            retval.append(self.getJson(symbol=self.symbol, price=price, timestamp=timestamp))
         return retval
 
     def process_trade(self, json_data):
@@ -113,10 +112,9 @@ class PriceBybit(PriceBase):
 
         data = json_data['data']
         for entry in data:
-            symbol  = entry["symbol"]
             price   = float(entry["price"])
             timestamp = int(entry["trade_time_ms"])
-            retval.append(self.getJson(symbol=symbol, price=price, timestamp=timestamp))
+            retval.append(self.getJson(symbol=self.symbol, price=price, timestamp=timestamp))
         return retval
 
     # def process_json_data(self, topic:str, json_data):

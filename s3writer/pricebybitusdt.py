@@ -8,9 +8,10 @@ TOPIC_BYBIT_USDT_OB200  = "orderBook_200.100ms"
 TOPIC_BYBIT_USDT_TRADE  = "trade"
 
 class PriceBybitUSDT(PriceBase):
-    def __init__(self, topic):
+    def __init__(self, topic, symbol):
         self.log = log_json()
         self.topic = topic
+        self.symbol = symbol
         self.process_json_data = self.process_none
 
     # def process_candle(self, topic:str, json_data):

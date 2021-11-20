@@ -7,9 +7,10 @@ TOPIC_COINBASE_BTCUSD   = "BTC-USD"
 TOPIC_COINBASE_ETHUSD   = "ETH-USD"
 
 class PriceCoinbase(PriceBase):
-    def __init__(self, topic):
+    def __init__(self, topic, symbol):
         self.log = log_json()
         self.topic = topic
+        self.symbol = symbol
         self.process_json_data = self.process_none
 
     # def process_json_data(self, topic:str, json_data):

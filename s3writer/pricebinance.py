@@ -6,9 +6,10 @@ from pricebase import PriceBase
 TOPIC_BINANCE_BINANCE   = "binance"
 
 class PriceBinance(PriceBase):
-    def __init__(self, topic):
+    def __init__(self, topic, symbol):
         self.log = log_json()
         self.topic = topic
+        self.symbol = symbol
         self.process_json_data = self.process_none
 
     def verify_btcusdt_structure(self, json_data):
