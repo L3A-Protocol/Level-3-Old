@@ -4,11 +4,14 @@ from osbot_utils.utils.Json import str_to_json
 from pricebase import PriceBase
 
 TOPIC_BYBIT_INSURANCE   = "insurance"
-TOPIC_BYBIT_KLINE       = "klineV2.1.BTCUSD"
-TOPIC_BYBIT_OB200       = "orderBook_200.100ms.BTCUSD"
+TOPIC_BYBIT_KLINE       = "klineV2.1"
+TOPIC_BYBIT_OB200       = "orderBook_200.100ms"
 TOPIC_BYBIT_TRADE       = "trade"
 
 class PriceBybit(PriceBase):
+    def __init__(self, topic):
+        self.topic = topic
+
     def verify_trade_structure(self, json_data):
         if not 'topic' in json_data:
             return False
@@ -70,6 +73,34 @@ class PriceBybit(PriceBase):
 
         return True
 
+    def process_kline(self, json_data):
+        retval = []
+        for entry in json_data['data']:
+            symbol  = 'BTCUSD'
+            price   = float(entry["close"])
+            timestamp = int(json_data["timestamp_e6"]) / 1e3
+            retval.append(self.getJson(symbol=symbol, price=price, timestamp=timestamp))
+        return retval
+
+    def process_ob200(self, json_data):
+        retval = []
+        insert = json_data['data']['insert']
+        for entry in insert:
+            symbol  = entry["symbol"]
+            price   = float(entry["price"])
+            timestamp = int(json_data["timestamp_e6"]) / 1e3
+            retval.append(self.getJson(symbol=symbol, price=price, timestamp=timestamp))
+        return retval
+
+    def process_trade(self, json_data):
+        retval = []
+        data = json_data['data']
+        for entry in data:
+            symbol  = entry["symbol"]
+            price   = float(entry["price"])
+            timestamp = int(entry["trade_time_ms"])
+            retval.append(self.getJson(symbol=symbol, price=price, timestamp=timestamp))
+        return retval
 
     def process_json_data(self, topic:str, json_data):
         retval = []
@@ -77,25 +108,11 @@ class PriceBybit(PriceBase):
         if TOPIC_BYBIT_INSURANCE    == topic:
             return retval
         elif TOPIC_BYBIT_KLINE      == topic:
-            for entry in json_data['data']:
-                symbol  = 'BTCUSD'
-                price   = float(entry["close"])
-                timestamp = int(json_data["timestamp_e6"]) / 1e3
-                retval.append(self.getJson(symbol=symbol, price=price, timestamp=timestamp))
+            retval += self.process_kline(json_data)
         elif TOPIC_BYBIT_OB200      == topic and self.verify_ob200_structure(json_data):
-            insert = json_data['data']['insert']
-            for entry in insert:
-                symbol  = entry["symbol"]
-                price   = float(entry["price"])
-                timestamp = int(json_data["timestamp_e6"]) / 1e3
-                retval.append(self.getJson(symbol=symbol, price=price, timestamp=timestamp))
+            retval += self.process_ob200(json_data)
         elif TOPIC_BYBIT_TRADE      == topic and self.verify_trade_structure(json_data):
-            data = json_data['data']
-            for entry in data:
-                symbol  = entry["symbol"]
-                price   = float(entry["price"])
-                timestamp = int(entry["trade_time_ms"])
-                retval.append(self.getJson(symbol=symbol, price=price, timestamp=timestamp))
+            retval += self.process_trade(json_data)
 
         return retval
 

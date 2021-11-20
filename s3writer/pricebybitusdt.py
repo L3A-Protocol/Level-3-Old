@@ -3,9 +3,9 @@ from log_json import log_json
 from osbot_utils.utils.Json import str_to_json
 from pricebase import PriceBase
 
-TOPIC_BYBIT_USDT_CANDLE = "candle.1.BTCUSDT"
-TOPIC_BYBIT_USDT_OB200  = "orderBook_200.100ms.BTCUSDT"
-TOPIC_BYBIT_USDT_TRADE  = "trade.BTCUSDT"
+TOPIC_BYBIT_USDT_CANDLE = "candle.1"
+TOPIC_BYBIT_USDT_OB200  = "orderBook_200.100ms"
+TOPIC_BYBIT_USDT_TRADE  = "trade"
 
 class PriceBybitUSDT(PriceBase):
 
