@@ -45,3 +45,5 @@ class SysInfo(object):
         self.mutex.release()
         if self.thread:
             self.thread.join()
+        self.index.delete()
+        print('sysinfo thread stopped')

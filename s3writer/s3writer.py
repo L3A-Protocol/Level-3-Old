@@ -56,10 +56,7 @@ def handler(signum, frame):
     print("==> Stopping the application. Please allow some time for the theads to finish up gracefully")
     print("")
 
-    if osclient and osclient.enabled and price_index:
-        osclient.delete_index(price_index.name)
-
-    sys.exit()
+    # sys.exit()
 
 def get_current_timestamp():
     dt = datetime.now(timezone.utc)
@@ -115,7 +112,10 @@ class s3writer(object):
             if 'candle.1' == topic:
                 return f'"{topic}.{symbol}"'
 
-        return f'{symbol}'
+        if "Coinbase" == exchange:
+            return f'"{symbol}"'
+
+        return f'"{symbol}"'
 
     def get_topic_argument(self):
         if 'ByBit' == exchange:
@@ -131,6 +131,9 @@ class s3writer(object):
                 return f'{topic}.{symbol}'
             if 'trade' == topic:
                 return f'{topic}.{symbol}'
+
+        if "Coinbase" == exchange:
+            return f'{symbol}'
 
         return topic
 
@@ -182,6 +185,8 @@ class s3writer(object):
         global s3
 
         if stop_it:
+            print('flush_thread stopped')
+            price_index.delete()
             return
 
         self.mutex.acquire()
@@ -284,6 +289,7 @@ class s3writer(object):
         with open(FIFO) as fifo:
             while True:
                 if stop_it:
+                    print('FIFO reader stopped')
                     break
 
                 line = self.readline(fifo)

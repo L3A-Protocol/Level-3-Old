@@ -149,12 +149,18 @@ class Index(object):
             print(ex)
         return response
 
+def delete_indexes(list):
+    osclient = OpenSearchClient()
+    for item in list:
+        print(f'Deleting {item}')
+        print(osclient.delete_index(item))
+
 def test_it():
     print('\nConnecting:')
     osclient = OpenSearchClient()
 
     print('\nCreating index:')
-    test_index = Index(osclient,'python-test-index','None','None')
+    test_index = Index(osclient,'python-test-index','none','none','none')
     test_index.create()
 
     # Add a document to the index.
@@ -191,4 +197,9 @@ def test_it():
     osclient.delete_index("")
 
 if __name__ == '__main__':
-    test_it()
+    # test_it()
+
+    id = 'a*'
+    list = ['*ff9fc547-2fe3-413b-83f4-070152256e90*']
+
+    delete_indexes(list=list)
