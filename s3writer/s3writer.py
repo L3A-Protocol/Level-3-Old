@@ -79,9 +79,9 @@ class s3writer(object):
         self.old_flush_timestamp = 0
         self.mutex = Lock()
         self.taskid = uuid.uuid4()
-        self.priceinfo = PriceInfo(exchange, topic, symbol)
         self.verification_string = self.get_verification_string()
         self.topic_argument = self.get_topic_argument()
+        self.priceinfo = PriceInfo(exchange, topic, symbol)
 
     def readline(self, fifo):
         line = ''
