@@ -17,3 +17,5 @@ class PriceBase(object):
     def process_json_data(self, topic:str, json_data):
         return []
 
+    def process_none(self, json_data):
+        return []

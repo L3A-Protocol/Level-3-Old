@@ -6,8 +6,10 @@ from pricebase import PriceBase
 TOPIC_BINANCE_BINANCE   = "binance"
 
 class PriceBinance(PriceBase):
-    def __init__(self):
+    def __init__(self, topic):
         self.log = log_json()
+        self.topic = topic
+        self.process_json_data = self.process_none
 
     def verify_btcusdt_structure(self, json_data):
         if not 'stream' in json_data:
@@ -35,16 +37,16 @@ class PriceBinance(PriceBase):
 
         return True
 
-    def process_json_data(self, topic:str, json_data):
-        retval = []
+    # def process_json_data(self, topic:str, json_data):
+    #     retval = []
 
-        if TOPIC_BINANCE_BINANCE    == topic and self.verify_btcusdt_structure(json_data):
-            symbol      = json_data["data"]["s"]
-            price       = float(json_data["data"]["p"])
-            timestamp   = int(json_data["data"]["E"])
-            retval.append(self.getJson(symbol=symbol, price=price, timestamp=timestamp))
+    #     if TOPIC_BINANCE_BINANCE    == topic and self.verify_btcusdt_structure(json_data):
+    #         symbol      = json_data["data"]["s"]
+    #         price       = float(json_data["data"]["p"])
+    #         timestamp   = int(json_data["data"]["E"])
+    #         retval.append(self.getJson(symbol=symbol, price=price, timestamp=timestamp))
 
-        return retval
+    #     return retval
 
 if __name__ == '__main__':
     info = PriceBinance()
