@@ -32,42 +32,46 @@ class GdaAwsCdkStack(cdk.Stack):
 
         # binance_construct       = BinanceConstruct(self, "binance-service", bucket=bucket, cluster=cluster)
 
-        bybit_orderbook_200_btcusd     = BybitConstruct(self, 'bybit-orderbook-200-btcusd',
+# Bybit orderbook 200
+
+        bybit_orderbook_200_btcusd  = BybitConstruct(self, 'bybit-orderbook-200-btcusd',
                                     bucket=bucket,
                                     cluster=cluster,
                                     topic="orderBook_200.100ms",
                                     symbol="BTCUSD"
                                 )
 
-        bybit_orderbook_200_ethusd     = BybitConstruct(self, 'bybit-orderbook-200-ethusd',
+        bybit_orderbook_200_ethusd  = BybitConstruct(self, 'bybit-orderbook-200-ethusd',
                                     bucket=bucket,
                                     cluster=cluster,
                                     topic="orderBook_200.100ms",
                                     symbol="ETHUSD"
                                 )
 
-        bybit_orderbook_200_eosusd     = BybitConstruct(self, 'bybit-orderbook-200-eosusd',
+        bybit_orderbook_200_eosusd  = BybitConstruct(self, 'bybit-orderbook-200-eosusd',
                                     bucket=bucket,
                                     cluster=cluster,
                                     topic="orderBook_200.100ms",
                                     symbol="EOSUSD"
                                 )
 
-        bybit_orderbook_200_xrpusd     = BybitConstruct(self, 'bybit-orderbook-200-xrpusd',
+        bybit_orderbook_200_xrpusd  = BybitConstruct(self, 'bybit-orderbook-200-xrpusd',
                                     bucket=bucket,
                                     cluster=cluster,
                                     topic="orderBook_200.100ms",
                                     symbol="XRPUSD"
                                 )
 
-        bybit_orderbook_200_dotusd     = BybitConstruct(self, 'bybit-orderbook-200-dotusd',
+        bybit_orderbook_200_dotusd  = BybitConstruct(self, 'bybit-orderbook-200-dotusd',
                                     bucket=bucket,
                                     cluster=cluster,
                                     topic="orderBook_200.100ms",
                                     symbol="DOTUSD"
                                 )
 
-        bybit_insurance_btcusd  = BybitConstruct(self, 'bybit-insurance-btcusd',
+# Bybit insurance
+
+        bybit_insurance_btc  = BybitConstruct(self, 'bybit-insurance-btc',
                                     bucket=bucket,
                                     cluster=cluster,
                                     topic="insurance",
