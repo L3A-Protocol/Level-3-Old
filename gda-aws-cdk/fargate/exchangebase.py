@@ -24,7 +24,7 @@ class ExchangeBase(cdk.Construct):
 
         task_id = (f'{service_prefix}-td-{topic}').replace('.','-')
         log_id = f'{exchnage_name}ServicesLogGroup'
-        log_group_name = (f'/ecs/{service_prefix}-{topic}-log-group').replace('.','-')
+        log_group_name = (f'/ecs/{service_prefix}-{topic}-{symbol.lower()}-log-group').replace('.','-')
         container_id = (f'{service_prefix}-{topic}-container').replace('.','-')
         stream_prefix = "ecs"
 
