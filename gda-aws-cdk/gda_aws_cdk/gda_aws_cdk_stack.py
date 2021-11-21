@@ -32,10 +32,11 @@ class GdaAwsCdkStack(cdk.Stack):
 
         # binance_construct       = BinanceConstruct(self, "binance-service", bucket=bucket, cluster=cluster)
 
-        bybit_orderbook_200     = BybitConstruct(self, 'bybit-orderbook-200-service',
+        bybit_orderbook_200     = BybitConstruct(self, 'bybit-orderbook-200-btcusd',
                                     bucket=bucket,
                                     cluster=cluster,
-                                    topic="orderBook_200.100ms.BTCUSD"
+                                    topic="orderBook_200.100ms",
+                                    symbol="BTCUSD"
                                 )
 
         # bybit_insurance         = BybitConstruct(self, 'bybit-insurance-service',

@@ -13,5 +13,5 @@ TOPIC               = 'binance'
 
 class BinanceConstruct(ExchangeBase):
 
-    def __init__(self, scope: cdk.Construct, id: str, bucket: s3.Bucket, cluster: ecs.Cluster, **kwargs):
-        super().__init__(scope, id, EXCHNAGE_NAME, BIN_PATH, REPO_ARN, bucket, cluster, TOPIC, **kwargs)
+    def __init__(self, scope: cdk.Construct, id: str, bucket: s3.Bucket, cluster: ecs.Cluster, symbol:str, **kwargs):
+        super().__init__(scope, id, EXCHNAGE_NAME, BIN_PATH, REPO_ARN, bucket, cluster, TOPIC, symbol, **kwargs)

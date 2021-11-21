@@ -15,6 +15,7 @@ class ExchangeBase(cdk.Construct):
                 bucket:s3.Bucket,
                 cluster:ecs.Cluster,
                 topic: str,
+                symbol: str,
                 feed_interval='100',
                 **kwargs):
         super().__init__(scope, id, **kwargs)
@@ -44,6 +45,7 @@ class ExchangeBase(cdk.Construct):
                     "EXCHANGE"                  : exchnage_name,
                     "C_BINARY_PATH"             : binary_path,
                     "TOPIC"                     : topic,
+                    "SYMBOL"                    : symbol,
                     "AWS_ACCESS_KEY_ID"         : access_key_id,
                     "AWS_SECRET_ACCESS_KEY"     : access_secret_key,
                     "BUCKET_NAME"               : bucket.bucket_name,
