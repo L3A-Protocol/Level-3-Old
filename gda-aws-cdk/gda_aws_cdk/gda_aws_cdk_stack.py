@@ -106,6 +106,44 @@ class GdaAwsCdkStack(cdk.Stack):
                                     symbol='DOT'
                                 )
 
+# Bybit trade
+
+        bybit_trade_btcusd      = BybitConstruct(self, 'bybit-trade-btcusd',
+                                    bucket=bucket,
+                                    cluster=cluster,
+                                    topic="trade",
+                                    symbol='BTCUSD'
+                                )
+
+        bybit_trade_ethusd      = BybitConstruct(self, 'bybit-trade-ethusd',
+                                    bucket=bucket,
+                                    cluster=cluster,
+                                    topic="trade",
+                                    symbol='ETHUSD'
+                                )
+
+        bybit_trade_eosusd      = BybitConstruct(self, 'bybit-trade-eosusd',
+                                    bucket=bucket,
+                                    cluster=cluster,
+                                    topic="trade",
+                                    symbol='EOSUSD'
+                                )
+
+        bybit_trade_xrpusd      = BybitConstruct(self, 'bybit-trade-xrpusd',
+                                    bucket=bucket,
+                                    cluster=cluster,
+                                    topic="trade",
+                                    symbol='XRPUSD'
+                                )
+
+        bybit_trade_dotusd      = BybitConstruct(self, 'bybit-trade-dotusd',
+                                    bucket=bucket,
+                                    cluster=cluster,
+                                    topic="trade",
+                                    symbol='DOTUSD'
+                                )
+
+
 # BTCUSD
 # ETHUSD
 # EOSUSD
@@ -117,12 +155,6 @@ class GdaAwsCdkStack(cdk.Stack):
 # eosusd
 # xrpusd
 # dotusd
-
-        # bybit_trade             = BybitConstruct(self, 'bybit-trade-',
-        #                             bucket=bucket,
-        #                             cluster=cluster,
-        #                             topic="trade"
-        #                         )
 
         # bybit_klinev21          = BybitConstruct(self, 'bybit-klinev21-',
         #                             bucket=bucket,
