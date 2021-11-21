@@ -67,19 +67,60 @@ class GdaAwsCdkStack(cdk.Stack):
                                     symbol="DOTUSD"
                                 )
 
-        # bybit_insurance         = BybitConstruct(self, 'bybit-insurance-service',
-        #                             bucket=bucket,
-        #                             cluster=cluster,
-        #                             topic="insurance"
-        #                         )
+        bybit_insurance_btcusd  = BybitConstruct(self, 'bybit-insurance-btcusd',
+                                    bucket=bucket,
+                                    cluster=cluster,
+                                    topic="insurance",
+                                    symbol='BTC'
+                                )
 
-        # bybit_trade             = BybitConstruct(self, 'bybit-trade-service',
+        bybit_insurance_eth  = BybitConstruct(self, 'bybit-insurance-eth',
+                                    bucket=bucket,
+                                    cluster=cluster,
+                                    topic="insurance",
+                                    symbol='ETH'
+                                )
+
+        bybit_insurance_eos  = BybitConstruct(self, 'bybit-insurance-eos',
+                                    bucket=bucket,
+                                    cluster=cluster,
+                                    topic="insurance",
+                                    symbol='EOS'
+                                )
+
+        bybit_insurance_xrp  = BybitConstruct(self, 'bybit-insurance-xrp',
+                                    bucket=bucket,
+                                    cluster=cluster,
+                                    topic="insurance",
+                                    symbol='XRP'
+                                )
+
+        bybit_insurance_dot  = BybitConstruct(self, 'bybit-insurance-dot',
+                                    bucket=bucket,
+                                    cluster=cluster,
+                                    topic="insurance",
+                                    symbol='DOT'
+                                )
+
+# BTCUSD
+# ETHUSD
+# EOSUSD
+# XRPUSD
+# DOTUSD
+
+# btcusd
+# ethusd
+# eosusd
+# xrpusd
+# dotusd
+
+        # bybit_trade             = BybitConstruct(self, 'bybit-trade-',
         #                             bucket=bucket,
         #                             cluster=cluster,
         #                             topic="trade"
         #                         )
 
-        # bybit_klinev21          = BybitConstruct(self, 'bybit-klinev21-service',
+        # bybit_klinev21          = BybitConstruct(self, 'bybit-klinev21-',
         #                             bucket=bucket,
         #                             cluster=cluster,
         #                             topic="klineV2.1.BTCUSD"
