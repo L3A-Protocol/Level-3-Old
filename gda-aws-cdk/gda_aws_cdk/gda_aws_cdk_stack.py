@@ -143,24 +143,40 @@ class GdaAwsCdkStack(cdk.Stack):
                                     symbol='DOTUSD'
                                 )
 
+        bybit_klinev21_btcusd   = BybitConstruct(self, 'bybit-klinev21-btcusd',
+                                    bucket=bucket,
+                                    cluster=cluster,
+                                    topic="klineV2.1",
+                                    symbol='BTCUSD'
+                                )
 
-# BTCUSD
-# ETHUSD
-# EOSUSD
-# XRPUSD
-# DOTUSD
+        bybit_klinev21_ethusd   = BybitConstruct(self, 'bybit-klinev21-ethusd',
+                                    bucket=bucket,
+                                    cluster=cluster,
+                                    topic="klineV2.1",
+                                    symbol='ETHUSD'
+                                )
 
-# btcusd
-# ethusd
-# eosusd
-# xrpusd
-# dotusd
+        bybit_klinev21_eosusd   = BybitConstruct(self, 'bybit-klinev21-eosusd',
+                                    bucket=bucket,
+                                    cluster=cluster,
+                                    topic="klineV2.1",
+                                    symbol='EOSUSD'
+                                )
 
-        # bybit_klinev21          = BybitConstruct(self, 'bybit-klinev21-',
-        #                             bucket=bucket,
-        #                             cluster=cluster,
-        #                             topic="klineV2.1.BTCUSD"
-        #                         )
+        bybit_klinev21_xrpusd   = BybitConstruct(self, 'bybit-klinev21-xrpusd',
+                                    bucket=bucket,
+                                    cluster=cluster,
+                                    topic="klineV2.1",
+                                    symbol='XRPUSD'
+                                )
+
+        bybit_klinev21_dotusd   = BybitConstruct(self, 'bybit-klinev21-dotusd',
+                                    bucket=bucket,
+                                    cluster=cluster,
+                                    topic="klineV2.1",
+                                    symbol='DOTUSD'
+                                )
 
         # bybitusdt_orderbook_200 = BybitUSDTConstruct(self, "bybitusdt-orderbook-200",
         #                             bucket=bucket,
