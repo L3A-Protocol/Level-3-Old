@@ -54,9 +54,10 @@ dkms.conf
 ws-echo/*
 
 .dccache
+gda-aws-cdk/cf.yaml
 
 s3writer/__pycache__/*
-s3writer/.env
+s3writer/.env*
 
 bybit/CMakeFiles/*
 bybit/CMakeCache.txt

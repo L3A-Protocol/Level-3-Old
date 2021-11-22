@@ -1,8 +1,6 @@
 FROM    gdafund/ubuntu-python
 
 RUN mkdir /app
-RUN pip3 install numpy
-RUN pip3 install pandas
 
 COPY lws-bybit /app
 COPY policy.json /app

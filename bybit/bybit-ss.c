@@ -21,6 +21,7 @@
  * possible to put the policy json in the code as a string and pass that at
  * context creation time.
  */
+#define _GNU_SOURCE
 
 #include <libwebsockets.h>
 #include <string.h>
@@ -149,8 +150,24 @@ bybit_receive_callback(void *userobj, const uint8_t *in, size_t len, int flags)
 	// lwsl_debug("%s", in);
 	if (fifo_descriptor >= 0) // the fifo is valid
 	{
+		// int cap = fcntl(fifo_descriptor, F_GETPIPE_SZ);
+		// int line_len = strlen(in);
+
+		// if (line_len >= 4096)
+		// {
+		// 	lwsl_user("Long line: %d \n", line_len);
+		// 	return LWSSSSRET_OK;
+		// }
+
+		// if (line_len + 2 < cap)
+		// {
+		// 	write(fifo_descriptor, in, strlen(in));
+		// 	write(fifo_descriptor, "\n", 1);
+		// }
+
 		write(fifo_descriptor, in, strlen(in));
 		write(fifo_descriptor, "\n", 1);
+
 	}
 
 	return LWSSSSRET_OK;

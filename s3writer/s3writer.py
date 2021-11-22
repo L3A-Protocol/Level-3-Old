@@ -2,6 +2,8 @@ import os
 import sys
 import errno
 import signal
+import uuid
+
 from dotenv import load_dotenv
 from osbot_utils.utils.Files import file_exists
 from osbot_utils.utils.Json import str_to_json
@@ -16,6 +18,9 @@ from threading import Timer, Thread, Lock
 from time import time
 
 from log_json import log_json
+from opensearchclient import OpenSearchClient, Index
+from priceinfo import PriceInfo
+from sysinfo import SysInfo
 
 # Variables
 
@@ -23,11 +28,12 @@ load_dotenv(override=True)
 exchange    = os.getenv("EXCHANGE", None)
 c_bin_path  = os.getenv("C_BINARY_PATH", None)
 topic       = os.getenv("TOPIC", None)
+symbol      = os.getenv("SYMBOL", None)
 bucket_name = os.getenv("BUCKET_NAME", None)
 
 access_key_id       = os.getenv("AWS_ACCESS_KEY_ID", None)
 access_secret_key   = os.getenv("AWS_SECRET_ACCESS_KEY", None)
-feed_interval       = int(os.getenv("FEED_INTERVAL", 100))
+feed_interval       = int(os.getenv("FEED_INTERVAL", 60000))
 
 s3 = boto3.resource(
     's3',
@@ -36,19 +42,21 @@ s3 = boto3.resource(
     config=Config(signature_version='s3v4')
 )
 
-old_flush_timestamp = 0
-raw_lines = ''
-number_of_lines = 0
-mutex = Lock()
 stop_it = False
+osclient = None
+price_index = None
 
 # Functions
 
 def handler(signum, frame):
     global stop_it
     stop_it = True
-    print("Stopping the application. Please allow some time for the theads to finish up gracefully")
-    sys.exit()
+
+    print("")
+    print("==> Stopping the application. Please allow some time for the theads to finish up gracefully")
+    print("")
+
+    # sys.exit()
 
 def get_current_timestamp():
     dt = datetime.now(timezone.utc)
@@ -58,158 +66,247 @@ def get_current_timestamp():
 def s3_bucket_folders(data, _symbol, year, month, day):
     return f'true-alpha/exchange={exchange}/{data}/symbol={_symbol}/year={str(year)}/month={str(month)}/day={str(day)}/'
 
-def s3_bucket_raw_data_folders(topic, year, month, day):
-    return f'raw-data/exchange={exchange}/{topic}/year={str(year)}/month={str(month)}/day={str(day)}/'
+def s3_bucket_raw_data_folders(topic, _symbol, year, month, day):
+    return f'raw-data/exchange={exchange}/{topic}/symbol={_symbol}/year={str(year)}/month={str(month)}/day={str(day)}/'
 
-def verify_feed_frequency (timestamp, number_of_lines, period):
-    global feed_interval
-    log = log_json()
+class s3writer(object):
+    def __init__(self):
+        self.raw_lines = ''
+        self.number_of_lines = 0
+        self.old_flush_timestamp = 0
+        self.mutex = Lock()
+        self.taskid = uuid.uuid4()
+        self.verification_string = self.get_verification_string()
+        self.topic_argument = self.get_topic_argument()
+        self.priceinfo = PriceInfo(exchange, topic, symbol)
 
-    expected_feed = math.floor(period / feed_interval)
+    def readline(self, fifo):
+        line = ''
+        try:
+            while True:
+                line += fifo.read(1)
+                if line.endswith('\n'):
+                    break
+        except:
+            pass
+        if self.verification_string in line:
+            return line
+        return ''
 
-    details = {"details":
-                {
-                    "timestamp":    timestamp,
-                    "period":       period,
-                    "lines_read":   number_of_lines,
-                    "expected":     expected_feed
+    def get_verification_string(self):
+        if 'ByBit' == exchange:
+            if 'orderBook_200.100ms' == topic:
+                return f'"{topic}.{symbol}"'
+            if 'trade' == topic:
+                return f'"{topic}.{symbol}"'
+            if 'klineV2.1' == topic:
+                return f'"{topic}.{symbol}"'
+            if 'insurance' == topic:
+                return f'"{topic}.{symbol}"'
+
+        if 'ByBit-USDT' == exchange:
+            if 'orderBook_200.100ms' == topic:
+                return f'"{topic}.{symbol}"'
+            if 'trade' == topic:
+                return f'"{topic}.{symbol}"'
+            if 'candle.1' == topic:
+                return f'"{topic}.{symbol}"'
+
+        if "Coinbase" == exchange:
+            return f'"{symbol}"'
+
+        return f'"{symbol}"'
+
+    def get_topic_argument(self):
+        if 'ByBit' == exchange:
+            if 'orderBook_200.100ms' == topic:
+                return f'{topic}.{symbol}'
+            if 'klineV2.1' == topic:
+                return f'{topic}.{symbol}'
+
+        if 'ByBit-USDT' == exchange:
+            if 'orderBook_200.100ms' == topic:
+                return f'{topic}.{symbol}'
+            if 'candle.1' == topic:
+                return f'{topic}.{symbol}'
+            if 'trade' == topic:
+                return f'{topic}.{symbol}'
+
+        if "Coinbase" == exchange:
+            return f'{symbol}'
+
+        return topic
+
+    def submit_line_to_opensearch(self, line):
+        global price_index
+
+        try:
+            price_data = self.priceinfo.process_raw_data(exchange=exchange, data=line)
+            for item in price_data:
+                if 'timestamp' in item:
+                    # price_index.add_document(document=item, timestamp=item['timestamp'])
+                    price_index.add_document(document=item)
+        except Exception as ex:
+            print(ex)
+
+    def process_raw_line(self, line):
+        self.submit_line_to_opensearch(line)
+
+        self.mutex.acquire()
+        try:
+            self.raw_lines = self.raw_lines + line
+            self.number_of_lines += 1
+        finally:
+            self.mutex.release()
+
+    def verify_feed_frequency (self, timestamp, period):
+        global feed_interval
+        log = log_json()
+
+        expected_feed = math.floor(period / feed_interval)
+
+        details = {"details":
+                    {
+                        "timestamp":    timestamp,
+                        "period":       period,
+                        "lines_read":   self.number_of_lines,
+                        "expected":     expected_feed
+                    }
                 }
-            }
 
-    log.create("INFO","Latest feed frequency", details)
+        log.create("INFO","Latest feed frequency", details)
 
-    if expected_feed > number_of_lines:
-        # Allert low feed frequency
-        log.create("ERROR", 'Low feed frequency')
+        if expected_feed > self.number_of_lines:
+            # Allert low feed frequency
+            log.create("ERROR", 'Low feed frequency')
 
-def process_raw_line(line):
-    global raw_lines
-    global number_of_lines
+    def flush_thread_function(self):
+        global stop_it
+        global s3
 
-    mutex.acquire()
-    try:
-        raw_lines = raw_lines + line
-        number_of_lines += 1
-    finally:
-        mutex.release()
+        if stop_it:
+            print('flush_thread stopped')
+            price_index.delete()
+            return
 
-def readline(fifo):
-    line = ''
-    try:
-        while True:
-            line += fifo.read(1)
-            if line.endswith('\n'):
-                break
-    except:
-        pass
-    return line
+        self.mutex.acquire()
+        try:
+            Timer(int(time()/60)*60+60 - time(), self.flush_thread_function).start ()
 
-def flush_thread_function():
-    global stop_it
-    global raw_lines
-    global number_of_lines
-    global old_flush_timestamp
+            utc_timestamp = get_current_timestamp()
 
-    if stop_it:
-        return
+            year = datetime.utcfromtimestamp(utc_timestamp).strftime('%Y')
+            month = datetime.utcfromtimestamp(utc_timestamp).strftime('%m')
+            day = datetime.utcfromtimestamp(utc_timestamp).strftime('%d')
 
-    mutex.acquire()
-    try:
-        Timer(int(time()/60)*60+60 - time(), flush_thread_function).start ()
+            seq = (int)(utc_timestamp * 1000000)
 
-        utc_timestamp = get_current_timestamp()
+            folders = s3_bucket_raw_data_folders(topic, symbol, year, month, day)
+            if self.raw_lines:
+                s3.Bucket(bucket_name).put_object(Key=f'{folders}{seq}', Body=self.raw_lines)
 
-        year = datetime.utcfromtimestamp(utc_timestamp).strftime('%Y')
-        month = datetime.utcfromtimestamp(utc_timestamp).strftime('%m')
-        day = datetime.utcfromtimestamp(utc_timestamp).strftime('%d')
+            period = math.floor((utc_timestamp - self.old_flush_timestamp) * 1000)
+            self.verify_feed_frequency(seq, period)
+            self.old_flush_timestamp = utc_timestamp
 
-        seq = (int)(utc_timestamp * 1000000)
+            self.raw_lines = ''
+            self.number_of_lines = 0
+        finally:
+            self.mutex.release()
 
-        folders = s3_bucket_raw_data_folders(topic, year, month, day)
-        if raw_lines:
-            s3.Bucket(bucket_name).put_object(Key=f'{folders}{seq}', Body=raw_lines)
+    def run(self):
+        global stop_it
+        global osclient
+        global price_index
 
-        period = math.floor((utc_timestamp - old_flush_timestamp) * 1000)
-        verify_feed_frequency(seq, number_of_lines, period)
-        old_flush_timestamp = utc_timestamp
+        log = log_json()
 
-        raw_lines = ''
-        number_of_lines = 0
-    finally:
-        mutex.release()
-
-# Functional code
-
-def main():
-    global stop_it
-    global old_flush_timestamp
-    log = log_json()
-
-    old_flush_timestamp = get_current_timestamp()
-
-    x = Thread(target=flush_thread_function, args=())
-    x.start()
-
-    if not exchange:
-        log.create("ERROR", "The exchange is not specified")
-        sys.exit()
-
-    if not c_bin_path:
-        log.create("ERROR", "The binary path is not specified")
-        sys.exit()
-
-    if not topic:
-        log.create ("ERROR", "The topic is not specified")
-        sys.exit()
-
-    if not bucket_name:
-        log.create ("ERROR" "The bucket_name is not specified")
-        sys.exit()
-
-    if not file_exists(c_bin_path):
-        log.create ("ERROR", f"File {c_bin_path} does not exist")
-        sys.exit()
-
-    if not access_key_id:
-        log.create ("ERROR", "AWS access key is not specified")
-        sys.exit()
-
-    if not access_secret_key:
-        log.create ("ERROR", "AWS secret key is not specified")
-        sys.exit()
-
-    try:
-        os.system(f'{c_bin_path} --topic {topic} &')
-    except OSError as oe:
-        if oe.errno != errno.EEXIST:
-            log.create ('ERROR', f'Failed to start {c_bin_path}')
+        if not exchange:
+            log.create("ERROR", "The exchange is not specified")
             sys.exit()
 
-    FIFO = f'/tmp/{topic}'
-    try:
-        os.mkfifo(FIFO)
-    except OSError as oe:
-        if oe.errno != errno.EEXIST:
-            log.create ("ERROR", f"Failed to create the pipe: {FIFO}")
+        if not c_bin_path:
+            log.create("ERROR", "The binary path is not specified")
             sys.exit()
 
-    with open(FIFO) as fifo:
-        while True:
-            if stop_it:
+        if not topic:
+            log.create ("ERROR", "The topic is not specified")
+            sys.exit()
+
+        if not symbol:
+            log.create ("ERROR", "The symbol is not specified")
+            sys.exit()
+
+        if not bucket_name:
+            log.create ("ERROR" "The bucket_name is not specified")
+            sys.exit()
+
+        if not file_exists(c_bin_path):
+            log.create ("ERROR", f"File {c_bin_path} does not exist")
+            sys.exit()
+
+        if not access_key_id:
+            log.create ("ERROR", "AWS access key is not specified")
+            sys.exit()
+
+        if not access_secret_key:
+            log.create ("ERROR", "AWS secret key is not specified")
+            sys.exit()
+
+        osclient = OpenSearchClient()
+        if not osclient or not osclient.server_online():
+            log.create ("ERROR", "Cannot access the OpenSearch host")
+            sys.exit()
+
+        price_index = Index(osclient, 'price', exchange=exchange, topic=topic, taskid=self.taskid)
+        if not price_index.create():
+            log.create ("ERROR", "Cannot create OpenSearch index")
+            sys.exit()
+
+        self.old_flush_timestamp = get_current_timestamp()
+
+        try:
+            os.system(f'{c_bin_path} --topic {self.topic_argument} &')
+        except OSError as oe:
+            if oe.errno != errno.EEXIST:
+                log.create ('ERROR', f'Failed to start {c_bin_path}')
                 sys.exit()
 
-            line = readline(fifo)
+        FIFO = f'/tmp/{self.topic_argument}'
+        try:
+            os.mkfifo(FIFO)
+        except OSError as oe:
+            if oe.errno != errno.EEXIST:
+                log.create ("ERROR", f"Failed to create the pipe: {FIFO}")
+                sys.exit()
 
-            if not line:
-                log.create("ERROR", "No line in FIFO")
-                continue
+        sys_info = SysInfo(osclient, exchange, topic, self.taskid)
+        sys_info.Start()
 
-            try:
-                process_raw_line(line)
-            except Exception as ex:
-                log.create ('ERROR', f'process_raw_line: {ex}')
-                continue
+        data_thread = Thread(target=self.flush_thread_function, args=())
+        data_thread.start()
+
+        with open(FIFO) as fifo:
+            while True:
+                if stop_it:
+                    print('FIFO reader stopped')
+                    break
+
+                line = self.readline(fifo)
+
+                if not line:
+                    continue
+
+                try:
+                    self.process_raw_line(line)
+                except Exception as ex:
+                    log.create ('ERROR', f'process_raw_line: {ex}')
+                    continue
+
+        data_thread.join()
+        sys_info.Stop()
+
 
 if __name__ == '__main__':
     signal.signal(signal.SIGINT, handler)
-    main()
+    s3writer().run()

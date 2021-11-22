@@ -23,6 +23,7 @@ mock
 
 # logging
 elasticsearch==7.12.0
+opensearch-py
 
 # needed for OSBOT-Elastic
 git+https://github.com/owasp-sbot/OSBot-AWS.git
