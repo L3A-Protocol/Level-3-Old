@@ -192,11 +192,19 @@ class GdaAwsCdkStack(cdk.Stack):
                                     symbol='ETHUSDT'
                                 )
 
-        # bybitusdt_trade         = BybitUSDTConstruct(self, "bybitusdt-trade",
-        #                             bucket=bucket,
-        #                             cluster=cluster,
-        #                             topic="trade.BTCUSDT"
-        #                         )
+        bybitusdt_trade_btcusdt = BybitUSDTConstruct(self, "bybitusdt-trade-btcusdt",
+                                    bucket=bucket,
+                                    cluster=cluster,
+                                    topic="trade",
+                                    symbol='BTCUSDT'
+                                )
+
+        bybitusdt_trade_ethusdt = BybitUSDTConstruct(self, "bybitusdt-trade-ethusdt",
+                                    bucket=bucket,
+                                    cluster=cluster,
+                                    topic="trade",
+                                    symbol='ETHUSDT'
+                                )
 
         # bybitusdt_candle        = BybitUSDTConstruct(self, "bybitusdt-candle",
         #                             bucket=bucket,
