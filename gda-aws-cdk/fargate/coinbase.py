@@ -8,7 +8,7 @@ from fargate.exchangebase import ExchangeBase
 
 EXCHNAGE_NAME       = 'Coinbase'
 BIN_PATH            = "/app/lws-coinbase"
-REPO_ARN            = "arn:aws:ecr:us-west-1:381452754685:repository/coinbase03"
+REPO_ARN            = "arn:aws:ecr:us-west-1:381452754685:repository/coinbase"
 
 class CoinbaseConstruct(ExchangeBase):
 

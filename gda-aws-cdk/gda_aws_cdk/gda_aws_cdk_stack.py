@@ -220,17 +220,19 @@ class GdaAwsCdkStack(cdk.Stack):
                                     symbol='ETHUSDT'
                                 )
 
-        # coinbase_ethusd         = CoinbaseConstruct(self, "coinbase-ethusd",
-        #                             bucket=bucket,
-        #                             cluster=cluster,
-        #                             topic="ETH-USD"
-        #                         )
+        coinbase_ethusd         = CoinbaseConstruct(self, "coinbase-ethusd",
+                                    bucket=bucket,
+                                    cluster=cluster,
+                                    topic="feed-pro",
+                                    symbol="ETH-USD"
+                                )
 
-        # coinbase_btcusd         = CoinbaseConstruct(self, "coinbase-btcusd",
-        #                             bucket=bucket,
-        #                             cluster=cluster,
-        #                             topic="BTC-USD"
-        #                         )
+        coinbase_btcusd         = CoinbaseConstruct(self, "coinbase-btcusd",
+                                    bucket=bucket,
+                                    cluster=cluster,
+                                    topic="feed-pro",
+                                    symbol="BTC-USD"
+                                )
 
         # task_switcher_lambda = _lambda.Function(
         #     self, 'TaskSwitcher',
