@@ -206,11 +206,19 @@ class GdaAwsCdkStack(cdk.Stack):
                                     symbol='ETHUSDT'
                                 )
 
-        # bybitusdt_candle        = BybitUSDTConstruct(self, "bybitusdt-candle",
-        #                             bucket=bucket,
-        #                             cluster=cluster,
-        #                             topic="candle.1.BTCUSDT"
-        #                         )
+        bybitusdt_candle_btcusdt = BybitUSDTConstruct(self, "bybitusdt-candle-btcusdt",
+                                    bucket=bucket,
+                                    cluster=cluster,
+                                    topic="candle.1",
+                                    symbol='BTCUSDT'
+                                )
+
+        bybitusdt_candle_ethusdt = BybitUSDTConstruct(self, "bybitusdt-candle-ethusdt",
+                                    bucket=bucket,
+                                    cluster=cluster,
+                                    topic="candle.1",
+                                    symbol='ETHUSDT'
+                                )
 
         # coinbase_ethusd         = CoinbaseConstruct(self, "coinbase-ethusd",
         #                             bucket=bucket,
