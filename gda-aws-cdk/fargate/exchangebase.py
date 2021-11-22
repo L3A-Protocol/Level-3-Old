@@ -6,6 +6,8 @@ from aws_cdk import (core as cdk,
                      aws_ecr as ecr,
                      aws_logs as logs)
 
+DEFAULT_FEED_INTERVAL = '30000'
+
 class ExchangeBase(cdk.Construct):
 
     def __init__(self, scope: cdk.Construct, id:str,
@@ -16,7 +18,7 @@ class ExchangeBase(cdk.Construct):
                 cluster:ecs.Cluster,
                 topic: str,
                 symbol: str,
-                feed_interval='100',
+                feed_interval=DEFAULT_FEED_INTERVAL,
                 **kwargs):
         super().__init__(scope, id, **kwargs)
 
@@ -47,6 +49,7 @@ class ExchangeBase(cdk.Construct):
                     "C_BINARY_PATH"             : binary_path,
                     "TOPIC"                     : topic,
                     "SYMBOL"                    : symbol,
+                    "FEED_INTERVAL"             : feed_interval,
                     "AWS_ACCESS_KEY_ID"         : access_key_id,
                     "AWS_SECRET_ACCESS_KEY"     : access_secret_key,
                     "BUCKET_NAME"               : bucket.bucket_name,

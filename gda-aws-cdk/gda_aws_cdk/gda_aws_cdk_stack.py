@@ -178,11 +178,19 @@ class GdaAwsCdkStack(cdk.Stack):
                                     symbol='DOTUSD'
                                 )
 
-        # bybitusdt_orderbook_200 = BybitUSDTConstruct(self, "bybitusdt-orderbook-200",
-        #                             bucket=bucket,
-        #                             cluster=cluster,
-        #                             topic="orderBook_200.100ms.BTCUSDT"
-        #                         )
+        bybitusdt_orderbook_200_btcusdt = BybitUSDTConstruct(self, 'bybitusdt-orderbook-200-btcusdt',
+                                    bucket=bucket,
+                                    cluster=cluster,
+                                    topic='orderBook_200.100ms',
+                                    symbol='BTCUSDT'
+                                )
+
+        bybitusdt_orderbook_200_ethusdt = BybitUSDTConstruct(self, 'bybitusdt-orderbook-200-ethusdt',
+                                    bucket=bucket,
+                                    cluster=cluster,
+                                    topic='orderBook_200.100ms',
+                                    symbol='ETHUSDT'
+                                )
 
         # bybitusdt_trade         = BybitUSDTConstruct(self, "bybitusdt-trade",
         #                             bucket=bucket,
