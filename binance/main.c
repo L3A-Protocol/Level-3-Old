@@ -31,6 +31,7 @@
 static struct lws_context *cx;
 static int interrupted;
 int test_result = 1;
+char topic[64] = {0};
 char fifo[64] = {0}; // a named pipe to write out the data
 
 extern const lws_ss_info_t ssi_binance_t;
@@ -52,15 +53,24 @@ sigint_handler(int sig)
 
 int main(int argc, const char **argv)
 {
+	const char * topic_cmd = NULL;
+
 	struct lws_context_creation_info info;
 
 	lws_context_info_defaults(&info, "/app/binance-policy.json");
 	lws_cmdline_option_handle_builtin(argc, argv, &info);
 	signal(SIGINT, sigint_handler);
 
-	lwsl_debug("LWS binance client\n");
+	if (!(topic_cmd = lws_cmdline_option(argc, argv, "--topic")))
+	{
+		lwsl_debug("LWS bybit client topic not specified");
+		return	-1;
+	}
 
-	lws_snprintf(fifo, sizeof(fifo),"/tmp/binance");
+	strcpy(topic, topic_cmd);
+
+	lwsl_debug("LWS binance client for topic: %s\n", topic);
+	lws_snprintf(fifo, sizeof(fifo),"/tmp/%s",topic);
 
 	info.extensions = extensions;
 

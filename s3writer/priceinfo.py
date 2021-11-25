@@ -11,7 +11,7 @@ from pricecoinbase import PriceCoinbase, TOPIC_COINBASE_BTCUSD, TOPIC_COINBASE_E
 
 EX_BYBIT        = "ByBit"
 EX_BYBIT_USDT   = "ByBit-USDT"
-EX_BINANCE      = "Binanace"
+EX_BINANCE      = "Binance"
 EX_COINBASE     = "Coinbase"
 
 class PriceInfo(object):

@@ -1,0 +1,15 @@
+wss://fstream.binance.com/stream?streams=btcusdt@aggTrade
+wss://fstream.binance.com/stream?streams=btcusdt@trade
+wss://fstream.binance.com/stream?streams=btcusdt@kline
+wss://fstream.binance.com/stream?streams=btcusdt@miniTicker
+wss://fstream.binance.com/stream?streams=btcusdt@ticker
+wss://fstream.binance.com/stream?streams=btcusdt@bookTicker
+wss://fstream.binance.com/stream?streams=btcusdt@depth@0ms
+
+wss://fstream.binance.com/stream?streams=ethusdt@aggTrade
+wss://fstream.binance.com/stream?streams=ethusdt@trade
+wss://fstream.binance.com/stream?streams=ethusdt@kline
+wss://fstream.binance.com/stream?streams=ethusdt@miniTicker
+wss://fstream.binance.com/stream?streams=ethusdt@ticker
+wss://fstream.binance.com/stream?streams=ethusdt@bookTicker
+wss://fstream.binance.com/stream?streams=ethusdt@depth@0ms

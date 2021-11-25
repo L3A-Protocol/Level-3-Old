@@ -115,6 +115,9 @@ class s3writer(object):
         if "Coinbase" == exchange:
             return f'"{symbol}"'
 
+        if "Binance" == exchange:
+            return f'"{symbol.lower()}@{topic}"'
+
         return f'"{symbol}"'
 
     def get_topic_argument(self):
@@ -134,6 +137,9 @@ class s3writer(object):
 
         if "Coinbase" == exchange:
             return f'{symbol}'
+
+        if "Binance" == exchange:
+            return f'{symbol.lower()}@{topic}'
 
         return topic
 
