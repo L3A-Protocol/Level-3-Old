@@ -19,7 +19,7 @@ from time import time
 
 from log_json import log_json
 from opensearchclient import OpenSearchClient, Index
-from priceinfo import PriceInfo
+from priceinfo import PriceInfo, EX_BINANCE, EX_BYBIT, EX_BYBIT_USDT, EX_COINBASE
 from sysinfo import SysInfo
 
 # Variables
@@ -94,7 +94,7 @@ class s3writer(object):
         return ''
 
     def get_verification_string(self):
-        if 'ByBit' == exchange:
+        if EX_BYBIT == exchange:
             if 'orderBook_200.100ms' == topic:
                 return f'"{topic}.{symbol}"'
             if 'trade' == topic:
@@ -104,7 +104,7 @@ class s3writer(object):
             if 'insurance' == topic:
                 return f'"{topic}.{symbol}"'
 
-        if 'ByBit-USDT' == exchange:
+        if EX_BYBIT_USDT == exchange:
             if 'orderBook_200.100ms' == topic:
                 return f'"{topic}.{symbol}"'
             if 'trade' == topic:
@@ -112,22 +112,22 @@ class s3writer(object):
             if 'candle.1' == topic:
                 return f'"{topic}.{symbol}"'
 
-        if "Coinbase" == exchange:
+        if EX_COINBASE == exchange:
             return f'"{symbol}"'
 
-        if "Binance" == exchange:
+        if EX_BINANCE == exchange:
             return f'"{symbol.lower()}@{topic}"'
 
         return f'"{symbol}"'
 
     def get_topic_argument(self):
-        if 'ByBit' == exchange:
+        if EX_BYBIT == exchange:
             if 'orderBook_200.100ms' == topic:
                 return f'{topic}.{symbol}'
             if 'klineV2.1' == topic:
                 return f'{topic}.{symbol}'
 
-        if 'ByBit-USDT' == exchange:
+        if EX_BYBIT_USDT == exchange:
             if 'orderBook_200.100ms' == topic:
                 return f'{topic}.{symbol}'
             if 'candle.1' == topic:
@@ -135,10 +135,10 @@ class s3writer(object):
             if 'trade' == topic:
                 return f'{topic}.{symbol}'
 
-        if "Coinbase" == exchange:
+        if EX_COINBASE == exchange:
             return f'{symbol}'
 
-        if "Binance" == exchange:
+        if EX_BINANCE == exchange:
             return f'{symbol.lower()}@{topic}'
 
         return topic
