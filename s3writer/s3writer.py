@@ -143,6 +143,17 @@ class s3writer(object):
 
         return topic
 
+    def update_policy_file(self):
+        binance_policypath='/app/binance-policy.json'
+        if EX_BINANCE == exchange:
+            fin = open(binance_policypath, "rt")
+            data = fin.read()
+            data = data.replace('*-topic-*', self.topic_argument)
+            fin.close()
+            fin = open(binance_policypath, "wt")
+            fin.write(data)
+            fin.close()
+
     def submit_line_to_opensearch(self, line):
         global price_index
 
@@ -272,6 +283,7 @@ class s3writer(object):
         self.old_flush_timestamp = get_current_timestamp()
 
         try:
+            self.update_policy_file()
             os.system(f'{c_bin_path} --topic {self.topic_argument} &')
         except OSError as oe:
             if oe.errno != errno.EEXIST:
