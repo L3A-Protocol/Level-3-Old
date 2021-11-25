@@ -54,6 +54,7 @@ dkms.conf
 ws-echo/*
 
 .dccache
+.vscode/*
 gda-aws-cdk/cf.yaml
 
 s3writer/__pycache__/*
