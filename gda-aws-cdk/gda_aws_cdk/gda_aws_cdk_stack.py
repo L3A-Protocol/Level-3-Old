@@ -30,14 +30,45 @@ class GdaAwsCdkStack(cdk.Stack):
 
         cluster = ecs.Cluster(self, "GDADataLakeCluster", vpc=vpc)
 
-# Binance
+# Binance @aggTrade
 
-        binance_construct       = BinanceConstruct(self, "binance-",
+        binance_aggTrade_btcusdt = BinanceConstruct(self, "binance-aggTrade-btcusdt",
                                     bucket=bucket,
                                     cluster=cluster,
                                     topic='aggTrade',
                                     symbol='BTCUSDT'
                                 )
+
+        binance_aggTrade_ethusdt = BinanceConstruct(self, "binance-aggTrade-ethusdt",
+                                    bucket=bucket,
+                                    cluster=cluster,
+                                    topic='aggTrade',
+                                    symbol='ETHUSDT'
+                                )
+
+# Binance @trade
+
+        binance_trade_btcusdt = BinanceConstruct(self, "binance-trade-btcusdt",
+                                    bucket=bucket,
+                                    cluster=cluster,
+                                    topic='trade',
+                                    symbol='BTCUSDT'
+                                )
+
+        binance_trade_ethusdt = BinanceConstruct(self, "binance-trade-ethusdt",
+                                    bucket=bucket,
+                                    cluster=cluster,
+                                    topic='trade',
+                                    symbol='ETHUSDT'
+                                )
+
+# Binance @kline
+
+# Binance @miniTicker
+
+# Binance @ticker
+
+# Binance @bookTicker
 
 # Bybit orderbook 200
 
