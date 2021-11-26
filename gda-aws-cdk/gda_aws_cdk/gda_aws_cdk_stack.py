@@ -80,6 +80,20 @@ class GdaAwsCdkStack(cdk.Stack):
 
 # Binance @miniTicker
 
+        binance_miniTicker_btcusdt = BinanceConstruct(self, "binance-miniTicker-btcusdt",
+                                    bucket=bucket,
+                                    cluster=cluster,
+                                    topic='miniTicker',
+                                    symbol='BTCUSDT'
+                                )
+
+        binance_miniTicker_ethusdt = BinanceConstruct(self, "binance-miniTicker-ethusdt",
+                                    bucket=bucket,
+                                    cluster=cluster,
+                                    topic='miniTicker',
+                                    symbol='ETHUSDT'
+                                )
+
 # Binance @ticker
 
 # Binance @bookTicker
