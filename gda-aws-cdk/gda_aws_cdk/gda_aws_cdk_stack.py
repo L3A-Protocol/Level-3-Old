@@ -64,6 +64,20 @@ class GdaAwsCdkStack(cdk.Stack):
 
 # Binance @kline
 
+        binance_kline_btcusdt = BinanceConstruct(self, "binance-kline-btcusdt",
+                                    bucket=bucket,
+                                    cluster=cluster,
+                                    topic='kline',
+                                    symbol='BTCUSDT'
+                                )
+
+        binance_kline_ethusdt = BinanceConstruct(self, "binance-kline-ethusdt",
+                                    bucket=bucket,
+                                    cluster=cluster,
+                                    topic='kline',
+                                    symbol='ETHUSDT'
+                                )
+
 # Binance @miniTicker
 
 # Binance @ticker
