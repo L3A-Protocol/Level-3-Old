@@ -112,6 +112,20 @@ class GdaAwsCdkStack(cdk.Stack):
 
 # Binance @bookTicker
 
+        binance_bookTicker_btcusdt = BinanceConstruct(self, "binance-bookTicker-btcusdt",
+                                    bucket=bucket,
+                                    cluster=cluster,
+                                    topic='bookTicker',
+                                    symbol='BTCUSDT'
+                                )
+
+        binance_bookTicker_ethusdt = BinanceConstruct(self, "binance-bookTicker-ethusdt",
+                                    bucket=bucket,
+                                    cluster=cluster,
+                                    topic='bookTicker',
+                                    symbol='ETHUSDT'
+                                )
+
 # Bybit orderbook 200
 
         bybit_orderbook_200_btcusd  = BybitConstruct(self, 'bybit-orderbook-200-btcusd',
