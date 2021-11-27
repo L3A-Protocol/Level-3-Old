@@ -32,9 +32,6 @@ Then execute the following:
     sudo docker run --env-file .env gdafund/binance:<version>
 ```
 
-
-
-
 ## Running ECS Fargate task with the container image
   
 You basically nee to follow [Deploying a Docker container with ECS and Fargate.](https://towardsdatascience.com/deploying-a-docker-container-with-ecs-and-fargate-7b0cbc9cd608)  
@@ -63,3 +60,11 @@ The only difference is that you should make change to the ESC task JSON definiti
             ],
 ...
 ```
+
+## Binance supporting libraries & documentation
+  
+- [Binance GitHub](https://github.com/binance)
+- [Official Documentation for the Binance APIs and Streams.](https://github.com/binance/binance-spot-api-docs)
+- [User Data Streams for Binance](https://github.com/binance/binance-spot-api-docs/blob/master/user-data-stream.md)
+- [Web Socket Streams for Binance](https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-streams.md)
+- [Binance Public API Connector Python](https://github.com/binance/binance-connector-python)
