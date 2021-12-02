@@ -88,3 +88,5 @@ binance/Makefile
 binance/cmake_install.cmake
 binance/lws-binance
 binance/.env
+
+local_lobs/.env
