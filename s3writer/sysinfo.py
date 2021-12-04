@@ -18,8 +18,14 @@ class SysInfo(object):
 
     def thread_function(self):
         self.mutex.acquire()
+
+        if self.stopped:
+            self.index.delete()
+            print('sysinfo thread stopped')
+            return
+
         try:
-            if not self.stopped: Timer(int(time()/RUN_INTREVAL)*RUN_INTREVAL+RUN_INTREVAL - time(), self.thread_function).start ()
+            Timer(int(time()/RUN_INTREVAL)*RUN_INTREVAL+RUN_INTREVAL - time(), self.thread_function).start ()
             cpu_usage = psutil.cpu_percent()
             ram_usage = psutil.virtual_memory()[2]
             netcounters = psutil.net_io_counters()._asdict()
@@ -48,5 +54,3 @@ class SysInfo(object):
         self.mutex.release()
         if self.thread:
             self.thread.join()
-        self.index.delete()
-        print('sysinfo thread stopped')
