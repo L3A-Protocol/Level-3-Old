@@ -21,6 +21,7 @@ class s3connector(object):
             aws_secret_access_key=access_secret_key,
             config=Config(signature_version='s3v4')
         )
+        self.bucket_name = os.getenv("BUCKET_NAME", None)
     
     def get_current_timestamp(self):
         dt = datetime.now(timezone.utc)
@@ -40,6 +41,14 @@ class s3connector(object):
     
     def get_todays_path(self):
         return self.get_date_path(self.get_current_timestamp())
+
+    def save_text_file(self, utc_timestamp, body:str):
+        if not body:
+            return
+
+        seq = (int)(utc_timestamp * 1000000)
+        folders = self.get_date_path(utc_timestamp)
+        self.s3.Bucket(self.bucket_name).put_object(Key=f'{folders}{seq}', Body=body)
 
 if __name__ == "__main__":
     reader = s3connector('Bybit','orderBook_200.100ms','BTCUSD')

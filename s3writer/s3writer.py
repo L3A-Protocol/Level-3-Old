@@ -37,13 +37,6 @@ access_key_id       = os.getenv("AWS_ACCESS_KEY_ID", None)
 access_secret_key   = os.getenv("AWS_SECRET_ACCESS_KEY", None)
 feed_interval       = int(os.getenv("FEED_INTERVAL", 60000))
 
-s3 = boto3.resource(
-    's3',
-    aws_access_key_id=access_key_id,
-    aws_secret_access_key=access_secret_key,
-    config=Config(signature_version='s3v4')
-)
-
 stop_it = False
 osclient = None
 price_index = None
@@ -58,15 +51,10 @@ def handler(signum, frame):
     print("==> Stopping the application. Please allow some time for the theads to finish up gracefully")
     print("")
 
-    # sys.exit()
-
 def get_current_timestamp():
     dt = datetime.now(timezone.utc)
     utc_time = dt.replace(tzinfo=timezone.utc)
     return utc_time.timestamp()
-
-# def s3_bucket_raw_data_folders(topic, _symbol, year, month, day):
-#     return f'raw-data/exchange={exchange}/{topic}/symbol={_symbol}/year={str(year)}/month={str(month)}/day={str(day)}/'
 
 class s3writer(object):
     def __init__(self):
@@ -199,7 +187,6 @@ class s3writer(object):
 
     def flush_thread_function(self):
         global stop_it
-        global s3
 
         if stop_it:
             print('flush_thread stopped')
@@ -210,21 +197,12 @@ class s3writer(object):
         try:
             Timer(int(time()/60)*60+60 - time(), self.flush_thread_function).start ()
 
-            utc_timestamp = get_current_timestamp()
+            utc_timestamp = self.connector.get_current_timestamp()
 
-            # year = datetime.utcfromtimestamp(utc_timestamp).strftime('%Y')
-            # month = datetime.utcfromtimestamp(utc_timestamp).strftime('%m')
-            # day = datetime.utcfromtimestamp(utc_timestamp).strftime('%d')
-
-            seq = (int)(utc_timestamp * 1000000)
-
-            # folders = s3_bucket_raw_data_folders(topic, symbol, year, month, day)
-            folders = self.connector.get_todays_path()
-            if self.raw_lines:
-                s3.Bucket(bucket_name).put_object(Key=f'{folders}{seq}', Body=self.raw_lines)
+            self.connector.save_text_file(utc_timestamp=utc_timestamp, body=self.raw_lines)
 
             period = math.floor((utc_timestamp - self.old_flush_timestamp) * 1000)
-            self.verify_feed_frequency(seq, period)
+            self.verify_feed_frequency(utc_timestamp, period)
             self.old_flush_timestamp = utc_timestamp
 
             self.raw_lines = ''
