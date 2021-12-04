@@ -22,6 +22,8 @@ from opensearchclient import OpenSearchClient, Index
 from priceinfo import PriceInfo, EX_BINANCE, EX_BYBIT, EX_BYBIT_USDT, EX_COINBASE
 from sysinfo import SysInfo
 
+from s3connector import s3connector
+
 # Variables
 
 load_dotenv(override=True)
@@ -63,11 +65,8 @@ def get_current_timestamp():
     utc_time = dt.replace(tzinfo=timezone.utc)
     return utc_time.timestamp()
 
-def s3_bucket_folders(data, _symbol, year, month, day):
-    return f'true-alpha/exchange={exchange}/{data}/symbol={_symbol}/year={str(year)}/month={str(month)}/day={str(day)}/'
-
-def s3_bucket_raw_data_folders(topic, _symbol, year, month, day):
-    return f'raw-data/exchange={exchange}/{topic}/symbol={_symbol}/year={str(year)}/month={str(month)}/day={str(day)}/'
+# def s3_bucket_raw_data_folders(topic, _symbol, year, month, day):
+#     return f'raw-data/exchange={exchange}/{topic}/symbol={_symbol}/year={str(year)}/month={str(month)}/day={str(day)}/'
 
 class s3writer(object):
     def __init__(self):
@@ -79,6 +78,7 @@ class s3writer(object):
         self.verification_string = self.get_verification_string()
         self.topic_argument = self.get_topic_argument()
         self.priceinfo = PriceInfo(exchange, topic, symbol)
+        self.connector = s3connector(exchange=exchange,topic=topic, symbol=symbol)
 
     def readline(self, fifo):
         line = ''
@@ -212,13 +212,14 @@ class s3writer(object):
 
             utc_timestamp = get_current_timestamp()
 
-            year = datetime.utcfromtimestamp(utc_timestamp).strftime('%Y')
-            month = datetime.utcfromtimestamp(utc_timestamp).strftime('%m')
-            day = datetime.utcfromtimestamp(utc_timestamp).strftime('%d')
+            # year = datetime.utcfromtimestamp(utc_timestamp).strftime('%Y')
+            # month = datetime.utcfromtimestamp(utc_timestamp).strftime('%m')
+            # day = datetime.utcfromtimestamp(utc_timestamp).strftime('%d')
 
             seq = (int)(utc_timestamp * 1000000)
 
-            folders = s3_bucket_raw_data_folders(topic, symbol, year, month, day)
+            # folders = s3_bucket_raw_data_folders(topic, symbol, year, month, day)
+            folders = self.connector.get_todays_path()
             if self.raw_lines:
                 s3.Bucket(bucket_name).put_object(Key=f'{folders}{seq}', Body=self.raw_lines)
 
