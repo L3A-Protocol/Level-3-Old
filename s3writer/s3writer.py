@@ -3,6 +3,7 @@ import sys
 import errno
 import signal
 import uuid
+import select
 
 from dotenv import load_dotenv
 from osbot_utils.utils.Files import file_exists
@@ -38,8 +39,6 @@ access_secret_key   = os.getenv("AWS_SECRET_ACCESS_KEY", None)
 feed_interval       = int(os.getenv("FEED_INTERVAL", 60000))
 
 stop_it = False
-osclient = None
-price_index = None
 
 # Functions
 
@@ -67,14 +66,25 @@ class s3writer(object):
         self.topic_argument = self.get_topic_argument()
         self.priceinfo = PriceInfo(exchange, topic, symbol)
         self.connector = s3connector(exchange=exchange,topic=topic, symbol=symbol)
+        self.osclient = OpenSearchClient()
+
+        log = log_json()
+        if not self.osclient or not self.osclient.server_online():
+            log.create ("ERROR", "Cannot access the OpenSearch host")
+            sys.exit()
+        self.price_index = Index(self.osclient, 'price', exchange=exchange, topic=topic, taskid=self.taskid)
 
     def readline(self, fifo):
         line = ''
         try:
             while True:
-                line += fifo.read(1)
-                if line.endswith('\n'):
-                    break
+                # verify FIFO is not empty
+                # see https://stackoverflow.com/questions/21429369/read-file-with-timeout-in-python
+                r, w, e = select.select([ fifo ], [], [], 0)
+                if fifo in r:
+                    line += fifo.read(1)
+                    if line.endswith('\n'):
+                        break
         except:
             pass
         if self.verification_string in line:
@@ -143,14 +153,12 @@ class s3writer(object):
             fin.close()
 
     def submit_line_to_opensearch(self, line):
-        global price_index
-
         try:
             price_data = self.priceinfo.process_raw_data(exchange=exchange, data=line)
             for item in price_data:
                 if 'timestamp' in item:
                     # price_index.add_document(document=item, timestamp=item['timestamp'])
-                    price_index.add_document(document=item)
+                    self.price_index.add_document(document=item)
         except Exception as ex:
             print(ex)
 
@@ -190,7 +198,6 @@ class s3writer(object):
 
         if stop_it:
             print('flush_thread stopped')
-            price_index.delete()
             return
 
         self.mutex.acquire()
@@ -212,8 +219,6 @@ class s3writer(object):
 
     def run(self):
         global stop_it
-        global osclient
-        global price_index
 
         log = log_json()
 
@@ -249,16 +254,6 @@ class s3writer(object):
             log.create ("ERROR", "AWS secret key is not specified")
             sys.exit()
 
-        osclient = OpenSearchClient()
-        if not osclient or not osclient.server_online():
-            log.create ("ERROR", "Cannot access the OpenSearch host")
-            sys.exit()
-
-        price_index = Index(osclient, 'price', exchange=exchange, topic=topic, taskid=self.taskid)
-        if not price_index.create():
-            log.create ("ERROR", "Cannot create OpenSearch index")
-            sys.exit()
-
         self.old_flush_timestamp = get_current_timestamp()
 
         try:
@@ -277,7 +272,7 @@ class s3writer(object):
                 log.create ("ERROR", f"Failed to create the pipe: {FIFO}")
                 sys.exit()
 
-        sys_info = SysInfo(osclient, exchange, topic, self.taskid)
+        sys_info = SysInfo(self.osclient, exchange, topic, self.taskid)
         sys_info.Start()
 
         data_thread = Thread(target=self.flush_thread_function, args=())
@@ -303,6 +298,7 @@ class s3writer(object):
         data_thread.join()
         sys_info.Stop()
 
+        self.price_index.delete()
 
 if __name__ == '__main__':
     signal.signal(signal.SIGINT, handler)

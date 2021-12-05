@@ -68,7 +68,7 @@ class Index(object):
         self.index_body = {
             'settings': {
                 'index': {
-                'number_of_shards': 4
+                'number_of_shards': 1
                 }
             }
         }
@@ -76,7 +76,7 @@ class Index(object):
         self.topic = topic
 
     def delete(self):
-        return self.osclient.delete_index(self.name)
+        return self.osclient.delete_index(f'{self.name}*')
 
     def create(self):
         response = None
@@ -104,10 +104,10 @@ class Index(object):
 
         try:
             if not timestamp:
-                timestamp = datetime.datetime.utcnow().isoformat()
+                timestamp = datetime.datetime.utcnow()
 
             data = {
-                "timestamp" : timestamp,
+                "timestamp" : timestamp.isoformat(),
                 "exchange"  : self.exchage,
                 "topic"     : self.topic,
                 "taskid"    : self.taskid,
@@ -115,7 +115,7 @@ class Index(object):
                 "document"  : document
             }
             response = self.osclient.client.index(
-                index = self.name,
+                index = f'{self.name}-{timestamp.year}-{timestamp.month}-{timestamp.day}',
                 body = data,
                 id = self.id,
                 refresh = True,
@@ -212,6 +212,6 @@ if __name__ == '__main__':
     # 'sysinfo-70*','sysinfo-71*','sysinfo-73*','sysinfo-74*','sysinfo-76*','sysinfo-77*','sysinfo-78*','sysinfo-78*','sysinfo-79*','sysinfo-7a*','sysinfo-7b*','sysinfo-7c*','sysinfo-7d*','sysinfo-7e*','sysinfo-7f*',
     # ]
 
-    list = ['price-3d230d49-259a-4336-9b00-9672ee0b6f45']
+    list = ['*-2021-12-5']
 
     delete_indexes(list=list)
