@@ -202,16 +202,7 @@ def test_it():
 if __name__ == '__main__':
     # test_it()
 
-    # list = ['price-0*','price-1*','price-2*','price-3*','price-4*','price-8*','price-9*','price-a*','price-b*','price-c*','price-d*','price-e*','price-f*',
-    # 'price-50*','price-52*','price-53*','price-54*','price-55*','price-56*','price-57*','price-58*','price-59*','price-5a*','price-5b*','price-5c*','price-5d*','price-5e*','price-5f*',
-    # 'price-60*','price-61*','price-62*','price-63*','price-64*','price-65*','price-66*','price-68*','price-69*','price-6a*','price-6b*','price-6c*','price-6d*','price-6e*','price-6f*',
-    # 'price-70*','price-71*','price-73*','price-74*','price-75*','price-76*','price-77*','price-78*','price-79*','price-7a*','price-7b*','price-7c*','price-7d*','price-7e*','price-7f*',
-    # 'sysinfo-0*','sysinfo-1*','sysinfo-2*','sysinfo-3*','sysinfo-4*','sysinfo-8*','sysinfo-9*','sysinfo-a*','sysinfo-b*','sysinfo-c*','sysinfo-d*','sysinfo-e*','sysinfo-f*'
-    # 'sysinfo-50*','sysinfo-52*','sysinfo-53*','sysinfo-54*','sysinfo-55*','sysinfo-56*','sysinfo-57*','sysinfo-58*','sysinfo-59*','sysinfo-5a*','sysinfo-5b*','sysinfo-5c*','sysinfo-5d*','sysinfo-5e*','sysinfo-5f*',
-    # 'sysinfo-60*','sysinfo-61*','sysinfo-62*','sysinfo-63*','sysinfo-64*','sysinfo-65*','sysinfo-66*','sysinfo-68*','sysinfo-69*','sysinfo-6a*','sysinfo-6b*','sysinfo-6c*','sysinfo-6d*','sysinfo-6e*','sysinfo-6f*',
-    # 'sysinfo-70*','sysinfo-71*','sysinfo-73*','sysinfo-74*','sysinfo-76*','sysinfo-77*','sysinfo-78*','sysinfo-78*','sysinfo-79*','sysinfo-7a*','sysinfo-7b*','sysinfo-7c*','sysinfo-7d*','sysinfo-7e*','sysinfo-7f*',
-    # ]
-
-    list = ['*-2021-12-5']
+    # list = ['*-2021-12-5']
+    list = ['price-*','sysinfo-*']
 
     delete_indexes(list=list)

@@ -1,0 +1,48 @@
+{
+    "policy": {
+        "policy_id": "hot_warm_delete",
+        "description": "hot warm delete workflow",
+        "last_updated_time": 1638722195437,
+        "schema_version": 1,
+        "error_notification": null,
+        "default_state": "hot",
+        "states": [
+            {
+                "name": "hot",
+                "actions": [
+                    {
+                        "replica_count": {
+                            "number_of_replicas": 1
+                        }
+                    }
+                ],
+                "transitions": [
+                    {
+                        "state_name": "delete",
+                        "conditions": {
+                            "min_index_age": "10d"
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "delete",
+                "actions": [
+                    {
+                        "delete": {}
+                    }
+                ],
+                "transitions": []
+            }
+        ],
+        "ism_template": [
+            {
+                "index_patterns": [
+                    "*"
+                ],
+                "priority": 100,
+                "last_updated_time": 1638702416039
+            }
+        ]
+    }
+}
