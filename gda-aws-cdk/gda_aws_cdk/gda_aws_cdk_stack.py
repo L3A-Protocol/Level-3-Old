@@ -18,19 +18,8 @@ from fargate.coinbase   import CoinbaseConstruct
 
 class GdaAwsCdkStack(cdk.Stack):
 
-    def __init__(self, scope: cdk.Construct, construct_id: str, **kwargs) -> None:
-        super().__init__(scope, construct_id, **kwargs)
-
-        bucket = s3.Bucket(self, "GDADataLake",
-            versioned=True,
-            removal_policy=cdk.RemovalPolicy.DESTROY,
-            auto_delete_objects=True)
-
-        vpc = ec2.Vpc(self, "GDADataLakeVpc", max_azs=3)
-
-        cluster = ecs.Cluster(self, "GDADataLakeCluster", vpc=vpc)
-
-# Binance @aggTrade
+    def BinanceDeployment(self, bucket, vpc, cluster):
+        # Binance @aggTrade
 
         binance_aggTrade_btcusdt = BinanceConstruct(self, "binance-aggTrade-btcusdt",
                                     bucket=bucket,
@@ -46,7 +35,7 @@ class GdaAwsCdkStack(cdk.Stack):
                                     symbol='ETHUSDT'
                                 )
 
-# Binance @trade
+        # Binance @trade
 
         binance_trade_btcusdt = BinanceConstruct(self, "binance-trade-btcusdt",
                                     bucket=bucket,
@@ -62,7 +51,7 @@ class GdaAwsCdkStack(cdk.Stack):
                                     symbol='ETHUSDT'
                                 )
 
-# Binance @kline
+        # Binance @kline
 
         binance_kline_btcusdt = BinanceConstruct(self, "binance-kline-btcusdt",
                                     bucket=bucket,
@@ -78,7 +67,7 @@ class GdaAwsCdkStack(cdk.Stack):
                                     symbol='ETHUSDT'
                                 )
 
-# Binance @miniTicker
+        # Binance @miniTicker
 
         binance_miniTicker_btcusdt = BinanceConstruct(self, "binance-miniTicker-btcusdt",
                                     bucket=bucket,
@@ -94,7 +83,7 @@ class GdaAwsCdkStack(cdk.Stack):
                                     symbol='ETHUSDT'
                                 )
 
-# Binance @ticker
+        # Binance @ticker
 
         binance_ticker_btcusdt = BinanceConstruct(self, "binance-ticker-btcusdt",
                                     bucket=bucket,
@@ -110,7 +99,7 @@ class GdaAwsCdkStack(cdk.Stack):
                                     symbol='ETHUSDT'
                                 )
 
-# Binance @bookTicker
+        # Binance @bookTicker
 
         binance_bookTicker_btcusdt = BinanceConstruct(self, "binance-bookTicker-btcusdt",
                                     bucket=bucket,
@@ -126,6 +115,7 @@ class GdaAwsCdkStack(cdk.Stack):
                                     symbol='ETHUSDT'
                                 )
 
+    def BybitDeployment(self, bucket, vpc, cluster):
 # Bybit orderbook 200
 
         bybit_orderbook_200_btcusd  = BybitConstruct(self, 'bybit-orderbook-200-btcusd',
@@ -272,6 +262,7 @@ class GdaAwsCdkStack(cdk.Stack):
                                     symbol='DOTUSD'
                                 )
 
+    def BybitUSDTDeployment(self, bucket, vpc, cluster):
         bybitusdt_orderbook_200_btcusdt = BybitUSDTConstruct(self, 'bybitusdt-orderbook-200-btcusdt',
                                     bucket=bucket,
                                     cluster=cluster,
@@ -314,6 +305,7 @@ class GdaAwsCdkStack(cdk.Stack):
                                     symbol='ETHUSDT'
                                 )
 
+    def CoinbaseDeployment(self, bucket, vpc, cluster):
         coinbase_ethusd         = CoinbaseConstruct(self, "coinbase-ethusd",
                                     bucket=bucket,
                                     cluster=cluster,
@@ -327,6 +319,24 @@ class GdaAwsCdkStack(cdk.Stack):
                                     topic="feed-pro",
                                     symbol="BTC-USD"
                                 )
+
+    def __init__(self, scope: cdk.Construct, construct_id: str, **kwargs) -> None:
+        super().__init__(scope, construct_id, **kwargs)
+
+        bucket = s3.Bucket(self, "GDADataLake",
+            versioned=True,
+            removal_policy=cdk.RemovalPolicy.DESTROY,
+            auto_delete_objects=True)
+
+        vpc = ec2.Vpc(self, "GDADataLakeVpc", max_azs=3)
+
+        cluster = ecs.Cluster(self, "GDADataLakeCluster", vpc=vpc)
+
+        self.BinanceDeployment  (bucket=bucket, vpc=vpc, cluster=cluster)
+        self.BybitDeployment    (bucket=bucket, vpc=vpc, cluster=cluster)
+        self.BybitUSDTDeployment(bucket=bucket, vpc=vpc, cluster=cluster)
+        self.CoinbaseDeployment (bucket=bucket, vpc=vpc, cluster=cluster)
+
 
         # task_switcher_lambda = _lambda.Function(
         #     self, 'TaskSwitcher',

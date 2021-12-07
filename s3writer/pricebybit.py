@@ -17,10 +17,10 @@ class PriceBybit(PriceBase):
 
         if TOPIC_BYBIT_INSURANCE    == topic:
             self.process_json_data = self.process_none
-        elif TOPIC_BYBIT_KLINE      == topic:
-            self.process_json_data = self.process_kline
-        elif TOPIC_BYBIT_OB200      == topic:
-            self.process_json_data = self.process_ob200
+        # elif TOPIC_BYBIT_KLINE      == topic:
+        #     self.process_json_data = self.process_kline
+        # elif TOPIC_BYBIT_OB200      == topic:
+        #     self.process_json_data = self.process_ob200
         elif TOPIC_BYBIT_TRADE      == topic:
             self.process_json_data = self.process_trade
 
