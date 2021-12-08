@@ -1,4 +1,5 @@
 import os
+import sys
 
 from datetime import datetime
 from datetime import timezone
@@ -7,14 +8,26 @@ from dotenv import load_dotenv
 import boto3
 from botocore.client import Config
 
+from log_json import log_json
+
 class s3connector(object):
     def __init__(self, exchange:str, topic:str, symbol:str):
         self.exchange = exchange
         self.topic = topic
         self.symbol = symbol
+        self.log = log_json()
 
         access_key_id       = os.getenv("AWS_ACCESS_KEY_ID", None)
         access_secret_key   = os.getenv("AWS_SECRET_ACCESS_KEY", None)
+
+        if not access_key_id:
+            self.log.create ("ERROR", "AWS access key is not specified")
+            sys.exit()
+
+        if not access_secret_key:
+            self.log.create ("ERROR", "AWS secret key is not specified")
+            sys.exit()
+
         self.s3 = boto3.resource(
             's3',
             aws_access_key_id=access_key_id,

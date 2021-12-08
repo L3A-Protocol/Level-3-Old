@@ -33,10 +33,7 @@ c_bin_path  = os.getenv("C_BINARY_PATH", None)
 topic       = os.getenv("TOPIC", None)
 symbol      = os.getenv("SYMBOL", None)
 bucket_name = os.getenv("BUCKET_NAME", None)
-
-access_key_id       = os.getenv("AWS_ACCESS_KEY_ID", None)
-access_secret_key   = os.getenv("AWS_SECRET_ACCESS_KEY", None)
-feed_interval       = int(os.getenv("FEED_INTERVAL", 60000))
+feed_interval = int(os.getenv("FEED_INTERVAL", 60000))
 
 stop_it = False
 
@@ -244,14 +241,6 @@ class s3writer(object):
 
         if not file_exists(c_bin_path):
             log.create ("ERROR", f"File {c_bin_path} does not exist")
-            sys.exit()
-
-        if not access_key_id:
-            log.create ("ERROR", "AWS access key is not specified")
-            sys.exit()
-
-        if not access_secret_key:
-            log.create ("ERROR", "AWS secret key is not specified")
             sys.exit()
 
         self.old_flush_timestamp = get_current_timestamp()
