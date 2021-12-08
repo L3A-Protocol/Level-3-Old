@@ -50,6 +50,13 @@ class s3connector(object):
         folders = self.get_date_path(utc_timestamp)
         self.s3.Bucket(self.bucket_name).put_object(Key=f'{folders}{seq}', Body=body)
 
+    def get_file_list(self, utc_timestamp):
+        bucket = self.s3.Bucket(self.bucket_name)
+        prefix = self.get_date_path(utc_timestamp=utc_timestamp)
+        for object in bucket.objects.filter(Prefix=prefix):
+            print(object.key)
+
 if __name__ == "__main__":
-    reader = s3connector('Bybit','orderBook_200.100ms','BTCUSD')
-    print(reader.get_todays_path())
+    connector = s3connector(exchange='ByBit',topic='orderBook_200.100ms',symbol='BTCUSD')
+    connector.get_file_list(connector.get_current_timestamp())
+
