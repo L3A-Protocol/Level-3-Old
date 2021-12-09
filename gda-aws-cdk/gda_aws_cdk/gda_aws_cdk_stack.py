@@ -53,67 +53,67 @@ class GdaAwsCdkStack(cdk.Stack):
 
         # Binance @kline
 
-        binance_kline_btcusdt = BinanceConstruct(self, "binance-kline-btcusdt",
-                                    bucket=bucket,
-                                    cluster=cluster,
-                                    topic='kline',
-                                    symbol='BTCUSDT'
-                                )
+        # binance_kline_btcusdt = BinanceConstruct(self, "binance-kline-btcusdt",
+        #                             bucket=bucket,
+        #                             cluster=cluster,
+        #                             topic='kline',
+        #                             symbol='BTCUSDT'
+        #                         )
 
-        binance_kline_ethusdt = BinanceConstruct(self, "binance-kline-ethusdt",
-                                    bucket=bucket,
-                                    cluster=cluster,
-                                    topic='kline',
-                                    symbol='ETHUSDT'
-                                )
+        # binance_kline_ethusdt = BinanceConstruct(self, "binance-kline-ethusdt",
+        #                             bucket=bucket,
+        #                             cluster=cluster,
+        #                             topic='kline',
+        #                             symbol='ETHUSDT'
+        #                         )
 
         # Binance @miniTicker
 
-        binance_miniTicker_btcusdt = BinanceConstruct(self, "binance-miniTicker-btcusdt",
-                                    bucket=bucket,
-                                    cluster=cluster,
-                                    topic='miniTicker',
-                                    symbol='BTCUSDT'
-                                )
+        # binance_miniTicker_btcusdt = BinanceConstruct(self, "binance-miniTicker-btcusdt",
+        #                             bucket=bucket,
+        #                             cluster=cluster,
+        #                             topic='miniTicker',
+        #                             symbol='BTCUSDT'
+        #                         )
 
-        binance_miniTicker_ethusdt = BinanceConstruct(self, "binance-miniTicker-ethusdt",
-                                    bucket=bucket,
-                                    cluster=cluster,
-                                    topic='miniTicker',
-                                    symbol='ETHUSDT'
-                                )
+        # binance_miniTicker_ethusdt = BinanceConstruct(self, "binance-miniTicker-ethusdt",
+        #                             bucket=bucket,
+        #                             cluster=cluster,
+        #                             topic='miniTicker',
+        #                             symbol='ETHUSDT'
+        #                         )
 
         # Binance @ticker
 
-        binance_ticker_btcusdt = BinanceConstruct(self, "binance-ticker-btcusdt",
-                                    bucket=bucket,
-                                    cluster=cluster,
-                                    topic='ticker',
-                                    symbol='BTCUSDT'
-                                )
+        # binance_ticker_btcusdt = BinanceConstruct(self, "binance-ticker-btcusdt",
+        #                             bucket=bucket,
+        #                             cluster=cluster,
+        #                             topic='ticker',
+        #                             symbol='BTCUSDT'
+        #                         )
 
-        binance_ticker_ethusdt = BinanceConstruct(self, "binance-ticker-ethusdt",
-                                    bucket=bucket,
-                                    cluster=cluster,
-                                    topic='ticker',
-                                    symbol='ETHUSDT'
-                                )
+        # binance_ticker_ethusdt = BinanceConstruct(self, "binance-ticker-ethusdt",
+        #                             bucket=bucket,
+        #                             cluster=cluster,
+        #                             topic='ticker',
+        #                             symbol='ETHUSDT'
+        #                         )
 
         # Binance @bookTicker
 
-        binance_bookTicker_btcusdt = BinanceConstruct(self, "binance-bookTicker-btcusdt",
-                                    bucket=bucket,
-                                    cluster=cluster,
-                                    topic='bookTicker',
-                                    symbol='BTCUSDT'
-                                )
+        # binance_bookTicker_btcusdt = BinanceConstruct(self, "binance-bookTicker-btcusdt",
+        #                             bucket=bucket,
+        #                             cluster=cluster,
+        #                             topic='bookTicker',
+        #                             symbol='BTCUSDT'
+        #                         )
 
-        binance_bookTicker_ethusdt = BinanceConstruct(self, "binance-bookTicker-ethusdt",
-                                    bucket=bucket,
-                                    cluster=cluster,
-                                    topic='bookTicker',
-                                    symbol='ETHUSDT'
-                                )
+        # binance_bookTicker_ethusdt = BinanceConstruct(self, "binance-bookTicker-ethusdt",
+        #                             bucket=bucket,
+        #                             cluster=cluster,
+        #                             topic='bookTicker',
+        #                             symbol='ETHUSDT'
+        #                         )
 
     def BybitDeployment(self, bucket, vpc, cluster):
 # Bybit orderbook 200
@@ -132,63 +132,63 @@ class GdaAwsCdkStack(cdk.Stack):
                                     symbol="ETHUSD"
                                 )
 
-        bybit_orderbook_200_eosusd  = BybitConstruct(self, 'bybit-orderbook-200-eosusd',
-                                    bucket=bucket,
-                                    cluster=cluster,
-                                    topic="orderBook_200.100ms",
-                                    symbol="EOSUSD"
-                                )
+        # bybit_orderbook_200_eosusd  = BybitConstruct(self, 'bybit-orderbook-200-eosusd',
+        #                             bucket=bucket,
+        #                             cluster=cluster,
+        #                             topic="orderBook_200.100ms",
+        #                             symbol="EOSUSD"
+        #                         )
 
-        bybit_orderbook_200_xrpusd  = BybitConstruct(self, 'bybit-orderbook-200-xrpusd',
-                                    bucket=bucket,
-                                    cluster=cluster,
-                                    topic="orderBook_200.100ms",
-                                    symbol="XRPUSD"
-                                )
+        # bybit_orderbook_200_xrpusd  = BybitConstruct(self, 'bybit-orderbook-200-xrpusd',
+        #                             bucket=bucket,
+        #                             cluster=cluster,
+        #                             topic="orderBook_200.100ms",
+        #                             symbol="XRPUSD"
+        #                         )
 
-        bybit_orderbook_200_dotusd  = BybitConstruct(self, 'bybit-orderbook-200-dotusd',
-                                    bucket=bucket,
-                                    cluster=cluster,
-                                    topic="orderBook_200.100ms",
-                                    symbol="DOTUSD"
-                                )
+        # bybit_orderbook_200_dotusd  = BybitConstruct(self, 'bybit-orderbook-200-dotusd',
+        #                             bucket=bucket,
+        #                             cluster=cluster,
+        #                             topic="orderBook_200.100ms",
+        #                             symbol="DOTUSD"
+        #                         )
 
 # Bybit insurance
 
-        bybit_insurance_btc  = BybitConstruct(self, 'bybit-insurance-btc',
-                                    bucket=bucket,
-                                    cluster=cluster,
-                                    topic="insurance",
-                                    symbol='BTC'
-                                )
+        # bybit_insurance_btc  = BybitConstruct(self, 'bybit-insurance-btc',
+        #                             bucket=bucket,
+        #                             cluster=cluster,
+        #                             topic="insurance",
+        #                             symbol='BTC'
+        #                         )
 
-        bybit_insurance_eth  = BybitConstruct(self, 'bybit-insurance-eth',
-                                    bucket=bucket,
-                                    cluster=cluster,
-                                    topic="insurance",
-                                    symbol='ETH'
-                                )
+        # bybit_insurance_eth  = BybitConstruct(self, 'bybit-insurance-eth',
+        #                             bucket=bucket,
+        #                             cluster=cluster,
+        #                             topic="insurance",
+        #                             symbol='ETH'
+        #                         )
 
-        bybit_insurance_eos  = BybitConstruct(self, 'bybit-insurance-eos',
-                                    bucket=bucket,
-                                    cluster=cluster,
-                                    topic="insurance",
-                                    symbol='EOS'
-                                )
+        # bybit_insurance_eos  = BybitConstruct(self, 'bybit-insurance-eos',
+        #                             bucket=bucket,
+        #                             cluster=cluster,
+        #                             topic="insurance",
+        #                             symbol='EOS'
+        #                         )
 
-        bybit_insurance_xrp  = BybitConstruct(self, 'bybit-insurance-xrp',
-                                    bucket=bucket,
-                                    cluster=cluster,
-                                    topic="insurance",
-                                    symbol='XRP'
-                                )
+        # bybit_insurance_xrp  = BybitConstruct(self, 'bybit-insurance-xrp',
+        #                             bucket=bucket,
+        #                             cluster=cluster,
+        #                             topic="insurance",
+        #                             symbol='XRP'
+        #                         )
 
-        bybit_insurance_dot  = BybitConstruct(self, 'bybit-insurance-dot',
-                                    bucket=bucket,
-                                    cluster=cluster,
-                                    topic="insurance",
-                                    symbol='DOT'
-                                )
+        # bybit_insurance_dot  = BybitConstruct(self, 'bybit-insurance-dot',
+        #                             bucket=bucket,
+        #                             cluster=cluster,
+        #                             topic="insurance",
+        #                             symbol='DOT'
+        #                         )
 
 # Bybit trade
 
@@ -227,40 +227,40 @@ class GdaAwsCdkStack(cdk.Stack):
                                     symbol='DOTUSD'
                                 )
 
-        bybit_klinev21_btcusd   = BybitConstruct(self, 'bybit-klinev21-btcusd',
-                                    bucket=bucket,
-                                    cluster=cluster,
-                                    topic="klineV2.1",
-                                    symbol='BTCUSD'
-                                )
+        # bybit_klinev21_btcusd   = BybitConstruct(self, 'bybit-klinev21-btcusd',
+        #                             bucket=bucket,
+        #                             cluster=cluster,
+        #                             topic="klineV2.1",
+        #                             symbol='BTCUSD'
+        #                         )
 
-        bybit_klinev21_ethusd   = BybitConstruct(self, 'bybit-klinev21-ethusd',
-                                    bucket=bucket,
-                                    cluster=cluster,
-                                    topic="klineV2.1",
-                                    symbol='ETHUSD'
-                                )
+        # bybit_klinev21_ethusd   = BybitConstruct(self, 'bybit-klinev21-ethusd',
+        #                             bucket=bucket,
+        #                             cluster=cluster,
+        #                             topic="klineV2.1",
+        #                             symbol='ETHUSD'
+        #                         )
 
-        bybit_klinev21_eosusd   = BybitConstruct(self, 'bybit-klinev21-eosusd',
-                                    bucket=bucket,
-                                    cluster=cluster,
-                                    topic="klineV2.1",
-                                    symbol='EOSUSD'
-                                )
+        # bybit_klinev21_eosusd   = BybitConstruct(self, 'bybit-klinev21-eosusd',
+        #                             bucket=bucket,
+        #                             cluster=cluster,
+        #                             topic="klineV2.1",
+        #                             symbol='EOSUSD'
+        #                         )
 
-        bybit_klinev21_xrpusd   = BybitConstruct(self, 'bybit-klinev21-xrpusd',
-                                    bucket=bucket,
-                                    cluster=cluster,
-                                    topic="klineV2.1",
-                                    symbol='XRPUSD'
-                                )
+        # bybit_klinev21_xrpusd   = BybitConstruct(self, 'bybit-klinev21-xrpusd',
+        #                             bucket=bucket,
+        #                             cluster=cluster,
+        #                             topic="klineV2.1",
+        #                             symbol='XRPUSD'
+        #                         )
 
-        bybit_klinev21_dotusd   = BybitConstruct(self, 'bybit-klinev21-dotusd',
-                                    bucket=bucket,
-                                    cluster=cluster,
-                                    topic="klineV2.1",
-                                    symbol='DOTUSD'
-                                )
+        # bybit_klinev21_dotusd   = BybitConstruct(self, 'bybit-klinev21-dotusd',
+        #                             bucket=bucket,
+        #                             cluster=cluster,
+        #                             topic="klineV2.1",
+        #                             symbol='DOTUSD'
+        #                         )
 
     def BybitUSDTDeployment(self, bucket, vpc, cluster):
         bybitusdt_orderbook_200_btcusdt = BybitUSDTConstruct(self, 'bybitusdt-orderbook-200-btcusdt',
@@ -291,19 +291,19 @@ class GdaAwsCdkStack(cdk.Stack):
                                     symbol='ETHUSDT'
                                 )
 
-        bybitusdt_candle_btcusdt = BybitUSDTConstruct(self, "bybitusdt-candle-btcusdt",
-                                    bucket=bucket,
-                                    cluster=cluster,
-                                    topic="candle.1",
-                                    symbol='BTCUSDT'
-                                )
+        # bybitusdt_candle_btcusdt = BybitUSDTConstruct(self, "bybitusdt-candle-btcusdt",
+        #                             bucket=bucket,
+        #                             cluster=cluster,
+        #                             topic="candle.1",
+        #                             symbol='BTCUSDT'
+        #                         )
 
-        bybitusdt_candle_ethusdt = BybitUSDTConstruct(self, "bybitusdt-candle-ethusdt",
-                                    bucket=bucket,
-                                    cluster=cluster,
-                                    topic="candle.1",
-                                    symbol='ETHUSDT'
-                                )
+        # bybitusdt_candle_ethusdt = BybitUSDTConstruct(self, "bybitusdt-candle-ethusdt",
+        #                             bucket=bucket,
+        #                             cluster=cluster,
+        #                             topic="candle.1",
+        #                             symbol='ETHUSDT'
+        #                         )
 
     def CoinbaseDeployment(self, bucket, vpc, cluster):
         coinbase_ethusd         = CoinbaseConstruct(self, "coinbase-ethusd",

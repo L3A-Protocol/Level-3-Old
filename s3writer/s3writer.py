@@ -12,8 +12,6 @@ from datetime import datetime
 from datetime import timezone
 
 import math
-import boto3
-from botocore.client import Config
 
 from threading import Timer, Thread, Lock
 from time import time
