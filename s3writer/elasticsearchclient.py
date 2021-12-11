@@ -139,7 +139,7 @@ def test_it():
     esclient.delete_index("")
 
 if __name__ == '__main__':
-    test_it()
+    # test_it()
 
-    # list = ['python-test-*']
-    # delete_indexes(list=list)
+    list = ['sysinfo-*', 'price-*']
+    delete_indexes(list=list)
