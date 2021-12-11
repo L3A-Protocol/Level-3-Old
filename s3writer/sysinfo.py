@@ -5,7 +5,7 @@ from threading import Timer, Thread, Lock
 from opensearchclient import OpenSearchClient, Index
 from collections import Counter
 
-RUN_INTREVAL = 3
+RUN_INTREVAL = 30
 
 class SysInfo(object):
     def __init__(self, opensearch:OpenSearchClient, exchange:str, topic:str, taskid: str):

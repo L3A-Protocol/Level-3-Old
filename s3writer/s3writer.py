@@ -17,7 +17,8 @@ from threading import Timer, Thread, Lock
 from time import time
 
 from log_json import log_json
-from opensearchclient import OpenSearchClient, Index
+# from opensearchclient import OpenSearchClient, Index
+from elasticsearchclient import ElasticsearchClient, Index
 from priceinfo import PriceInfo, EX_BINANCE, EX_BYBIT, EX_BYBIT_USDT, EX_COINBASE
 from sysinfo import SysInfo
 
@@ -61,13 +62,16 @@ class s3writer(object):
         self.topic_argument = self.get_topic_argument()
         self.priceinfo = PriceInfo(exchange, topic, symbol)
         self.connector = s3connector(exchange=exchange,topic=topic, symbol=symbol)
-        self.osclient = OpenSearchClient()
+        # self.osclient = OpenSearchClient()
+        self.osclient = ElasticsearchClient()
 
         log = log_json()
         if not self.osclient or not self.osclient.server_online():
-            log.create ("ERROR", "Cannot access the OpenSearch host")
+            # log.create ("ERROR", "Cannot access the OpenSearch host")
+            log.create ("ERROR", "Cannot access the Elasticsearch host")
             sys.exit()
         self.price_index = Index(self.osclient, 'price', exchange=exchange, topic=topic, taskid=self.taskid)
+        self.datafeed_index = Index(self.osclient, 'datafeed', exchange=exchange, topic=topic, taskid=self.taskid)
 
     def readline(self, fifo):
         line = ''
@@ -182,7 +186,8 @@ class s3writer(object):
                     }
                 }
 
-        log.create("INFO","Latest feed frequency", details)
+        # log.create("INFO","Latest feed frequency", details)
+        self.datafeed_index.add_document(document=details)
 
         if expected_feed > self.number_of_lines:
             # Allert low feed frequency
@@ -286,6 +291,7 @@ class s3writer(object):
         sys_info.Stop()
 
         self.price_index.delete()
+        self.datafeed_index.delete()
 
 if __name__ == '__main__':
     signal.signal(signal.SIGINT, handler)
