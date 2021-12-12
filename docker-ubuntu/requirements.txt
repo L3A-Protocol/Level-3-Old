@@ -22,7 +22,7 @@ pytest-datafiles
 mock
 
 # logging
-elasticsearch==7.12.0
+elasticsearch>=7.16.0
 
 # needed for OSBOT-Elastic
 git+https://github.com/owasp-sbot/OSBot-AWS.git
