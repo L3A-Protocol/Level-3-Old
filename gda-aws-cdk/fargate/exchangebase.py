@@ -39,10 +39,16 @@ class ExchangeBase(cdk.Construct):
         image = ecs.ContainerImage.from_ecr_repository(repo)
         access_key_id           = os.environ["EXCHANGE_ACCESS_KEY_ID"]
         access_secret_key       = os.environ["EXCHANGE_SECRET_ACCESS_KEY"]
-        opensearch_host         = os.environ["OPENSEARCH_HOST"]
-        opensearch_port         = '443'
-        opensearch_user         = os.environ["OPENSEARCH_USER"]
-        opensearch_password     = os.environ["OPENSEARCH_PASSWORD"]
+
+        # opensearch_host         = os.environ["OPENSEARCH_HOST"]
+        # opensearch_port         = '443'
+        # opensearch_user         = os.environ["OPENSEARCH_USER"]
+        # opensearch_password     = os.environ["OPENSEARCH_PASSWORD"]
+
+        elastic_host    = os.environ["ELASTIC_HOST"]
+        elastic_port    = os.environ["ELASTIC_PORT"]
+        elastic_schema  = os.environ["ELASTIC_SCHEMA"]
+        kibana_port     = os.environ["KIBANA_PORT"]
 
         environment = {
                     "EXCHANGE"                  : exchnage_name,
@@ -53,10 +59,14 @@ class ExchangeBase(cdk.Construct):
                     "AWS_ACCESS_KEY_ID"         : access_key_id,
                     "AWS_SECRET_ACCESS_KEY"     : access_secret_key,
                     "BUCKET_NAME"               : bucket.bucket_name,
-                    "OPENSEARCH_HOST"           : opensearch_host,
-                    "OPENSEARCH_PORT"           : opensearch_port,
-                    "OPENSEARCH_USER"           : opensearch_user,
-                    "OPENSEARCH_PASSWORD"       : opensearch_password,
+                #     "OPENSEARCH_HOST"           : opensearch_host,
+                #     "OPENSEARCH_PORT"           : opensearch_port,
+                #     "OPENSEARCH_USER"           : opensearch_user,
+                #     "OPENSEARCH_PASSWORD"       : opensearch_password,
+                     "ELASTIC_HOST"              : elastic_host,
+                     "ELASTIC_SCHEMA"            : elastic_schema,
+                     "ELASTIC_PORT"              : elastic_port,
+                     "KIBANA_PORT"               : kibana_port,
                 }
         
         logDetail = logs.LogGroup(self, log_id, log_group_name=log_group_name, retention=logs.RetentionDays.SIX_MONTHS, removal_policy=cdk.RemovalPolicy.DESTROY)

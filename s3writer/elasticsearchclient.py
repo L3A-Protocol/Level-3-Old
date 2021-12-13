@@ -141,5 +141,5 @@ def test_it():
 if __name__ == '__main__':
     # test_it()
 
-    list = ['sysinfo-*', 'price-*']
+    list = ['sysinfo-*', 'price-*', 'datafeed-*']
     delete_indexes(list=list)

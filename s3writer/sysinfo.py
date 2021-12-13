@@ -2,13 +2,14 @@ import os
 import psutil
 from time import time
 from threading import Timer, Thread, Lock
-from opensearchclient import OpenSearchClient, Index
+# from opensearchclient import OpenSearchClient, Index
+from elasticsearchclient import ElasticsearchClient, Index
 from collections import Counter
 
 RUN_INTREVAL = 30
 
 class SysInfo(object):
-    def __init__(self, opensearch:OpenSearchClient, exchange:str, topic:str, taskid: str):
+    def __init__(self, opensearch:ElasticsearchClient, exchange:str, topic:str, taskid: str):
         self.opensearch = opensearch
         self.index = Index(opensearch, "sysinfo", exchange=exchange, topic=topic, taskid=taskid)
         self.stopped = False
