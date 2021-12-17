@@ -102,9 +102,10 @@ if __name__ == "__main__":
     list = connector.get_latest_file_list()
     if list is None:
         print('Nothing in the list')
-    else:
-        for key in list:
-            lines = connector.get_s3_object(key)
-            for line in lines:
-             print (line)
+        exit(0)
+    lines = []
+    for key in list:
+        lines.extend(connector.get_s3_object(key))
+    for line in lines:
+        print (line)
 

@@ -10,6 +10,23 @@ class lob_bybit(object):
         self.connector = s3connector(exchange=LOB_BYBIT_EXCHANGE, topic=LOB_BYBIT_TOPIC, symbol=symbol)
         self.log = log_json()
 
+    def process_the_latest_s3_file(self):
+        lines = []
+
+        list = self.connector.get_latest_file_list()
+        if list is None:
+            print('Nothing in the list')
+            return lines
+
+        for key in list:
+            lines.extend(self.connector.get_s3_object(key))
+        return lines
+
 if __name__ == "__main__":
     lob = lob_bybit(symbol='BTCUSD')
+    lines = lob.process_the_latest_s3_file()
+    for line in lines:
+        print (line)
+    print(f'lines printed {len(lines)}')
+
 
