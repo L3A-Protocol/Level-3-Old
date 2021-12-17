@@ -1,5 +1,6 @@
 import os
 import sys
+import ntpath
 
 from datetime import datetime
 from datetime import timezone
@@ -16,6 +17,7 @@ class s3connector(object):
         self.topic = topic
         self.symbol = symbol
         self.log = log_json()
+        self.last_datepath = ''
 
         access_key_id       = os.getenv("AWS_ACCESS_KEY_ID", None)
         access_secret_key   = os.getenv("AWS_SECRET_ACCESS_KEY", None)
@@ -49,8 +51,8 @@ class s3connector(object):
         year = datetime.utcfromtimestamp(utc_timestamp).strftime('%Y')
         month = datetime.utcfromtimestamp(utc_timestamp).strftime('%m')
         day = datetime.utcfromtimestamp(utc_timestamp).strftime('%d')
-
-        return  self.s3_bucket_raw_data_folders(year, month, day)
+        self.last_datepath = self.s3_bucket_raw_data_folders(year, month, day)
+        return self.last_datepath
     
     def get_todays_path(self):
         return self.get_date_path(self.get_current_timestamp())
@@ -63,13 +65,24 @@ class s3connector(object):
         folders = self.get_date_path(utc_timestamp)
         self.s3.Bucket(self.bucket_name).put_object(Key=f'{folders}{seq}', Body=body)
 
-    def get_file_list(self, utc_timestamp):
+    def get_day_file_list(self, utc_timestamp):
+        list = []
         bucket = self.s3.Bucket(self.bucket_name)
         prefix = self.get_date_path(utc_timestamp=utc_timestamp)
         for object in bucket.objects.filter(Prefix=prefix):
-            print(object.key)
+            list.append(ntpath.basename(object.key))
+        print(list)
+
+    def get_latest_file_list(self):
+        list = []
+        utc_timestamp = self.get_current_timestamp()
+        bucket = self.s3.Bucket(self.bucket_name)
+        prefix = f'{self.get_date_path(utc_timestamp=utc_timestamp)}{(int)((int)(utc_timestamp/10) / 6) * 6}'
+        for object in bucket.objects.filter(Prefix=prefix):
+            list.append(ntpath.basename(object.key))
+        print(list)
 
 if __name__ == "__main__":
     connector = s3connector(exchange='ByBit',topic='orderBook_200.100ms',symbol='BTCUSD')
-    connector.get_file_list(connector.get_current_timestamp())
+    connector.get_latest_file_list()
 
