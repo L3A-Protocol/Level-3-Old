@@ -36,6 +36,9 @@ class s3connector(object):
             aws_secret_access_key=access_secret_key,
             config=Config(signature_version='s3v4')
         )
+
+        self.s3_client = boto3.client('s3')
+
         self.bucket_name = os.getenv("BUCKET_NAME", None)
     
     def get_current_timestamp(self):
@@ -70,8 +73,8 @@ class s3connector(object):
         bucket = self.s3.Bucket(self.bucket_name)
         prefix = self.get_date_path(utc_timestamp=utc_timestamp)
         for object in bucket.objects.filter(Prefix=prefix):
-            list.append(ntpath.basename(object.key))
-        print(list)
+            list.append(object.key)
+        return list
 
     def get_latest_file_list(self):
         list = []
@@ -79,10 +82,25 @@ class s3connector(object):
         bucket = self.s3.Bucket(self.bucket_name)
         prefix = f'{self.get_date_path(utc_timestamp=utc_timestamp)}{(int)((int)(utc_timestamp/10) / 6) * 6}'
         for object in bucket.objects.filter(Prefix=prefix):
-            list.append(ntpath.basename(object.key))
-        print(list)
+            list.append(object.key)
+        return list
+
+    def get_object(self, key):
+        contents = ''
+        try:
+            data = self.s3_client.get_object(Bucket=self.bucket_name,Key=key)
+            contents = data['Body'].read()
+        except Exception as ex:
+            print (ex)
+        return contents
 
 if __name__ == "__main__":
     connector = s3connector(exchange='ByBit',topic='orderBook_200.100ms',symbol='BTCUSD')
-    connector.get_latest_file_list()
+    list = connector.get_latest_file_list()
+    if list is None:
+        print('Nothing in the list')
+    else:
+        for key in list:
+            text = connector.get_object(key)
+            print (text)
 
