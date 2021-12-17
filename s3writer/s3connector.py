@@ -1,6 +1,5 @@
 import os
 import sys
-import ntpath
 
 from datetime import datetime
 from datetime import timezone
