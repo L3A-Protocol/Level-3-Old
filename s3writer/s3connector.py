@@ -86,15 +86,17 @@ class s3connector(object):
         return list
 
     def get_s3_object(self, key):
-        contents = ''
+        list = []
         try:
             data = self.s3_client.get_object(Bucket=self.bucket_name,Key=key)
             contents = data['Body'].read()
+            list = contents.decode("utf-8").split('\n')
         except Exception as ex:
             print (ex)
+            return []
         if not contents:
             return []
-        return contents.decode("utf-8").split('\n')
+        return list
 
 if __name__ == "__main__":
     connector = s3connector(exchange='ByBit',topic='orderBook_200.100ms',symbol='BTCUSD')
