@@ -110,10 +110,16 @@ if __name__ == "__main__":
     df = lob.get_data_lines(test_line)
     print(df)
 
-    # df = pd.read_json(json_to_str(data[DATA_UPDATE]))
-    # df.set_index('id')
-    # print(df.to_string())
-    # df = pd.read_json(json_to_str(data[DATA_INSERT]))
-    # df.set_index('id')
-    # print(df.to_string())
+    df.set_index(['side','id'],inplace=True)
+    print(df)
+
+    df.sort_index(level=0,ascending=True,inplace=True)
+    print(df)
+
+    df.drop(('Sell', 469990000), axis=0,inplace=True)
+    print(df)
+
+
+
+
 
