@@ -1,15 +1,22 @@
 
 import json
+import numpy as np
+import pandas as pd
 
 from log_json import log_json
 from s3connector import s3connector
+
+from osbot_utils.utils.Json import str_to_json, json_to_str, json_parse
 
 LOB_BYBIT_EXCHANGE  = 'ByBit'
 LOB_BYBIT_TOPIC     = 'orderBook_200.100ms'
 
 JSON_FIELD_TOPIC        = 'topic'
-JSON_FILED_TYPE         = 'type'
-JSON_FILED_DATA         = 'data'
+JSON_FIELD_TYPE         = 'type'
+JSON_FIELD_DATA         = 'data'
+JSON_FIELD_TIMESTAMP    = 'timestamp_e6'
+JSON_FIELD_CROSS_SEQ    = 'cross_seq'
+
 ESPECTED_TOPIC_PREFIX   = 'orderBook_200.100ms.'
 EXPECTED_TYPE           = 'delta'
 DATA_DELETE             = 'delete'
@@ -23,23 +30,34 @@ class lob_bybit(object):
         self.topic = ESPECTED_TOPIC_PREFIX + symbol
         self.log = log_json()
 
+    def field_present(self, field, line_json):
+        if field in line_json:
+            return True
+        print(f'Field {field} not found')
+        return False
+
     def verify_json(self, line_json):
-        if not JSON_FIELD_TOPIC in line_json:
+        if not self.field_present(JSON_FIELD_TOPIC, line_json):
             return False
-        if not line_json[JSON_FIELD_TOPIC] == self.topic:
+        if not self.field_present(JSON_FIELD_TYPE, line_json):
             return False
-        if not JSON_FILED_TYPE in line_json:
+        if not self.field_present(JSON_FIELD_DATA, line_json):
             return False
-        if not line_json[JSON_FILED_TYPE] == EXPECTED_TYPE:
+        if not self.field_present(JSON_FIELD_TIMESTAMP, line_json):
             return False
-        if not JSON_FILED_DATA in line_json:
+        if not self.field_present(JSON_FIELD_CROSS_SEQ, line_json):
             return False
 
-        if DATA_DELETE in line_json[JSON_FILED_DATA]:
+        if line_json[JSON_FIELD_TOPIC] != self.topic:
+            return False
+        if line_json[JSON_FIELD_TYPE] != EXPECTED_TYPE:
+            return False
+
+        if DATA_DELETE in line_json[JSON_FIELD_DATA]:
             return True
-        if DATA_UPDATE in line_json[JSON_FILED_DATA]:
+        if DATA_UPDATE in line_json[JSON_FIELD_DATA]:
             return True
-        if DATA_INSERT in line_json[JSON_FILED_DATA]:
+        if DATA_INSERT in line_json[JSON_FIELD_DATA]:
             return True
 
         return False
@@ -50,7 +68,7 @@ class lob_bybit(object):
             if not self.verify_json(line_json=line_json):
                 print ("the line cannot be verified")
                 return {}
-            return line_json[JSON_FILED_DATA]
+            return line_json[JSON_FIELD_DATA]
         except Exception as ex:
             print (ex)
 
@@ -76,6 +94,7 @@ if __name__ == "__main__":
     # print(f'lines printed {len(lines)}')
     data = lob.process_single_line(test_line)
     for item in data:
-        print(data[item])
-
+        df = pd.read_json(json_to_str(data[item]))
+        # print(data[item])
+        print(df.to_string())
 
