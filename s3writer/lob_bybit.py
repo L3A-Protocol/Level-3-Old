@@ -4,20 +4,53 @@ import json
 from log_json import log_json
 from s3connector import s3connector
 
-LOB_BYBIT_EXCHANGE = 'ByBit'
-LOB_BYBIT_TOPIC = 'orderBook_200.100ms'
+LOB_BYBIT_EXCHANGE  = 'ByBit'
+LOB_BYBIT_TOPIC     = 'orderBook_200.100ms'
+
+JSON_FIELD_TOPIC        = 'topic'
+JSON_FILED_TYPE         = 'type'
+JSON_FILED_DATA         = 'data'
+ESPECTED_TOPIC_PREFIX   = 'orderBook_200.100ms.'
+EXPECTED_TYPE           = 'delta'
+DATA_DELETE             = 'delete'
+DATA_UPDATE             = 'update'
+DATA_INSERT             = 'insert'
 
 class lob_bybit(object):
     def __init__(self, symbol:str):
         self.connector = s3connector(exchange=LOB_BYBIT_EXCHANGE, topic=LOB_BYBIT_TOPIC, symbol=symbol)
+        self.symbol = symbol
+        self.topic = ESPECTED_TOPIC_PREFIX + symbol
         self.log = log_json()
 
     def verify_json(self, line_json):
+        if not JSON_FIELD_TOPIC in line_json:
+            return False
+        if not line_json[JSON_FIELD_TOPIC] == self.topic:
+            return False
+        if not JSON_FILED_TYPE in line_json:
+            return False
+        if not line_json[JSON_FILED_TYPE] == EXPECTED_TYPE:
+            return False
+        if not JSON_FILED_DATA in line_json:
+            return False
+
+        if DATA_DELETE in line_json[JSON_FILED_DATA]:
+            return True
+        if DATA_UPDATE in line_json[JSON_FILED_DATA]:
+            return True
+        if DATA_INSERT in line_json[JSON_FILED_DATA]:
+            return True
+
         return False
 
     def process_single_line(self, line):
         try:
             line_json = json.loads(line)
+            if not self.verify_json(line_json=line_json):
+                print ("the line cannot be verified")
+                return {}
+            return line_json[JSON_FILED_DATA]
         except Exception as ex:
             print (ex)
 
@@ -37,9 +70,12 @@ test_line = '{"topic":"orderBook_200.100ms.BTCUSD","type":"delta","data":{"delet
 
 if __name__ == "__main__":
     lob = lob_bybit(symbol='BTCUSD')
-    lines = lob.process_the_latest_s3_file()
-    for line in lines:
-        print (line)
-    print(f'lines printed {len(lines)}')
+    # lines = lob.process_the_latest_s3_file()
+    # for line in lines:
+    #     print (line)
+    # print(f'lines printed {len(lines)}')
+    data = lob.process_single_line(test_line)
+    for item in data:
+        print(data[item])
 
 
