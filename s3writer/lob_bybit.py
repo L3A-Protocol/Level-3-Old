@@ -19,9 +19,11 @@ JSON_FIELD_CROSS_SEQ    = 'cross_seq'
 
 ESPECTED_TOPIC_PREFIX   = 'orderBook_200.100ms.'
 EXPECTED_TYPE           = 'delta'
-DATA_DELETE             = 'delete'
-DATA_UPDATE             = 'update'
-DATA_INSERT             = 'insert'
+LOB_ACTION_DELETE       = 'delete'
+LOB_ACTION_UPDATE       = 'update'
+LOB_ACTION_INSERT       = 'insert'
+
+DATA_LINE_COLUMN_NAMES = ["price","symbol","id","side","lob_action","timestamp"]
 
 class lob_bybit(object):
     def __init__(self, symbol:str):
@@ -53,24 +55,37 @@ class lob_bybit(object):
         if line_json[JSON_FIELD_TYPE] != EXPECTED_TYPE:
             return False
 
-        if DATA_DELETE in line_json[JSON_FIELD_DATA]:
+        if LOB_ACTION_DELETE in line_json[JSON_FIELD_DATA]:
             return True
-        if DATA_UPDATE in line_json[JSON_FIELD_DATA]:
+        if LOB_ACTION_UPDATE in line_json[JSON_FIELD_DATA]:
             return True
-        if DATA_INSERT in line_json[JSON_FIELD_DATA]:
+        if LOB_ACTION_INSERT in line_json[JSON_FIELD_DATA]:
             return True
 
         return False
 
-    def process_single_line(self, line):
+    def get_lob_actions(self, data, lob_action, timestamp):
+        df = pd.read_json(json_to_str(data[lob_action]))
+        sLength = len(df['price'])
+        df['lob_action'] = pd.Series(np.full(sLength, lob_action), index=df.index)
+        df['timestamp'] = pd.Series(np.full(sLength, timestamp), index=df.index)
+        return df
+
+    def get_data_lines(self, line):
+        df = pd.DataFrame(columns=DATA_LINE_COLUMN_NAMES)
         try:
             line_json = json.loads(line)
-            if not self.verify_json(line_json=line_json):
-                print ("the line cannot be verified")
-                return {}
-            return line_json[JSON_FIELD_DATA]
+            if self.verify_json(line_json=line_json):
+                data = line_json[JSON_FIELD_DATA]
+                df_delete = self.get_lob_actions(data, LOB_ACTION_DELETE, line_json[JSON_FIELD_TIMESTAMP])
+                df = pd.concat([df, df_delete])
+                df_update = self.get_lob_actions(data, LOB_ACTION_UPDATE, line_json[JSON_FIELD_TIMESTAMP])
+                df = pd.concat([df, df_update])
+                df_insert = self.get_lob_actions(data, LOB_ACTION_INSERT, line_json[JSON_FIELD_TIMESTAMP])
+                df = pd.concat([df, df_insert])
         except Exception as ex:
             print (ex)
+        return df
 
     def process_the_latest_s3_file(self):
         lines = []
@@ -92,9 +107,13 @@ if __name__ == "__main__":
     # for line in lines:
     #     print (line)
     # print(f'lines printed {len(lines)}')
-    data = lob.process_single_line(test_line)
-    for item in data:
-        df = pd.read_json(json_to_str(data[item]))
-        # print(data[item])
-        print(df.to_string())
+    df = lob.get_data_lines(test_line)
+    print(df)
+
+    # df = pd.read_json(json_to_str(data[DATA_UPDATE]))
+    # df.set_index('id')
+    # print(df.to_string())
+    # df = pd.read_json(json_to_str(data[DATA_INSERT]))
+    # df.set_index('id')
+    # print(df.to_string())
 
