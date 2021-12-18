@@ -23,7 +23,9 @@ LOB_ACTION_DELETE       = 'delete'
 LOB_ACTION_UPDATE       = 'update'
 LOB_ACTION_INSERT       = 'insert'
 
-DATA_LINE_COLUMN_NAMES = ["price","symbol","id","side","lob_action","timestamp"]
+RAW_DATA_COLUMN_NAMES = ["side","id","price","symbol","lob_action","size","timestamp"]
+# RAW_JSON = '[{"side":"Buy","id":0,"price":"00.00","symbol":"BTCUSD","lob_action":"None","size":0,"timestamp":0}]'
+# INDEXED_DATA_COLUMN_NAMES = ["price","symbol","lob_action","size","timestamp"]
 
 class lob_bybit(object):
     def __init__(self, symbol:str):
@@ -31,6 +33,7 @@ class lob_bybit(object):
         self.symbol = symbol
         self.topic = ESPECTED_TOPIC_PREFIX + symbol
         self.log = log_json()
+        self.lob_df = None
 
     def field_present(self, field, line_json):
         if field in line_json:
@@ -71,21 +74,60 @@ class lob_bybit(object):
         df['timestamp'] = pd.Series(np.full(sLength, timestamp), index=df.index)
         return df
 
-    def get_data_lines(self, line):
-        df = pd.DataFrame(columns=DATA_LINE_COLUMN_NAMES)
+    def get_delete_lines(self, line):
+        df = pd.DataFrame(columns=RAW_DATA_COLUMN_NAMES)
         try:
             line_json = json.loads(line)
             if self.verify_json(line_json=line_json):
                 data = line_json[JSON_FIELD_DATA]
                 df_delete = self.get_lob_actions(data, LOB_ACTION_DELETE, line_json[JSON_FIELD_TIMESTAMP])
                 df = pd.concat([df, df_delete])
-                df_update = self.get_lob_actions(data, LOB_ACTION_UPDATE, line_json[JSON_FIELD_TIMESTAMP])
-                df = pd.concat([df, df_update])
-                df_insert = self.get_lob_actions(data, LOB_ACTION_INSERT, line_json[JSON_FIELD_TIMESTAMP])
-                df = pd.concat([df, df_insert])
+                df.set_index(['side','id'],inplace=True)
         except Exception as ex:
             print (ex)
         return df
+
+    def get_update_lines(self, line):
+        df = pd.DataFrame(columns=RAW_DATA_COLUMN_NAMES)
+        try:
+            line_json = json.loads(line)
+            if self.verify_json(line_json=line_json):
+                data = line_json[JSON_FIELD_DATA]
+                df_update = self.get_lob_actions(data, LOB_ACTION_UPDATE, line_json[JSON_FIELD_TIMESTAMP])
+                df = pd.concat([df, df_update])
+                df.set_index(['side','id'],inplace=True)
+        except Exception as ex:
+            print (ex)
+        return df
+
+    def get_insert_lines(self, line):
+        df = pd.DataFrame(columns=RAW_DATA_COLUMN_NAMES)
+        try:
+            line_json = json.loads(line)
+            if self.verify_json(line_json=line_json):
+                data = line_json[JSON_FIELD_DATA]
+                df_insert = self.get_lob_actions(data, LOB_ACTION_INSERT, line_json[JSON_FIELD_TIMESTAMP])
+                df = pd.concat([df, df_insert])
+                df.set_index(['side','id'],inplace=True)
+        except Exception as ex:
+            print (ex)
+        return df
+
+    def delete_lob_lines(self, df_delete):
+        if self.lob_df is None:
+            return
+        pass
+
+    def update_lob_lines(self, df_update):
+        if self.lob_df is None:
+            self.insert_lob_lines(df_update)
+            return
+        pass
+
+    def insert_lob_lines(self, df_insert):
+        if self.lob_df is None:
+            self.lob_df = df_insert.copy(deep=True)
+        pass
 
     def process_the_latest_s3_file(self):
         lines = []
@@ -107,17 +149,36 @@ if __name__ == "__main__":
     # for line in lines:
     #     print (line)
     # print(f'lines printed {len(lines)}')
-    df = lob.get_data_lines(test_line)
-    print(df)
+    # df = lob.get_data_lines(test_line)
+    # print(df)
 
-    df.set_index(['side','id'],inplace=True)
-    print(df)
+    # df.set_index(['side','id'],inplace=True)
+    # print(df)
 
-    df.sort_index(level=0,ascending=True,inplace=True)
-    print(df)
+    # lob.lob = pd.concat(lob.lob, df)
+    # print(lob.lob)
+    # df_empty = pd.concat(df_empty, df)
+    # print(lob_df)
 
-    df.drop(('Sell', 469990000), axis=0,inplace=True)
-    print(df)
+
+    # df.sort_index(level=0,ascending=True,inplace=True)
+    # print(df)
+
+    # df.drop(('Sell', 469990000), axis=0,inplace=True)
+    # print(df)
+
+    df_delete = lob.get_delete_lines(test_line)
+    df_update = lob.get_update_lines(test_line)
+    df_insert = lob.get_insert_lines(test_line)
+
+    # print (df_delete)
+    # print (df_update)
+    # print (df_insert)
+
+
+    print (lob.lob_df)
+    lob.insert_lob_lines(df_insert)
+    print (lob.lob_df)
 
 
 
