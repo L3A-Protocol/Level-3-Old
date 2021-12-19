@@ -121,15 +121,12 @@ class lob_bybit(object):
                         .drop('_merge', axis=1))
 
     def update_lob_lines(self, df_update):
-        if self.lob_df is None:
-            self.insert_lob_lines(df_update)
-            return
-        pass
+        self.insert_lob_lines(df_update)
 
     def insert_lob_lines(self, df_insert):
         if self.lob_df is None:
             self.lob_df = df_insert.copy(deep=True)
-        pass
+        self.lob_df = pd.concat([self.lob_df,df_insert]).drop_duplicates(['side','id'],keep='last') #.sort_values('Code')
 
     def process_the_latest_s3_file(self):
         lines = []
@@ -177,15 +174,28 @@ if __name__ == "__main__":
     # print (df_update)
     # print (df_insert)
 
+    print('')
     print (lob.lob_df)
+
+    print('')
     lob.insert_lob_lines(df_insert)
     print (lob.lob_df)
 
+    print('')
     lob.delete_lob_lines(df_delete)
     print (lob.lob_df)
 
+    print('')
+    lob.insert_lob_lines(df_delete)
+    print (lob.lob_df)
+
+    print('')
     lob.delete_lob_lines(df_insert)
     print (lob.lob_df)
+
+
+    # lob.delete_lob_lines(df_insert)
+    # print (lob.lob_df)
 
 
 
