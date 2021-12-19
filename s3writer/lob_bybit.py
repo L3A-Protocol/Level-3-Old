@@ -82,7 +82,7 @@ class lob_bybit(object):
                 data = line_json[JSON_FIELD_DATA]
                 df_delete = self.get_lob_actions(data, LOB_ACTION_DELETE, line_json[JSON_FIELD_TIMESTAMP])
                 df = pd.concat([df, df_delete])
-                df.set_index(['side','id'],inplace=True)
+                # df.set_index(['side','id'],inplace=True)
         except Exception as ex:
             print (ex)
         return df
@@ -95,7 +95,7 @@ class lob_bybit(object):
                 data = line_json[JSON_FIELD_DATA]
                 df_update = self.get_lob_actions(data, LOB_ACTION_UPDATE, line_json[JSON_FIELD_TIMESTAMP])
                 df = pd.concat([df, df_update])
-                df.set_index(['side','id'],inplace=True)
+                # df.set_index(['side','id'],inplace=True)
         except Exception as ex:
             print (ex)
         return df
@@ -108,7 +108,7 @@ class lob_bybit(object):
                 data = line_json[JSON_FIELD_DATA]
                 df_insert = self.get_lob_actions(data, LOB_ACTION_INSERT, line_json[JSON_FIELD_TIMESTAMP])
                 df = pd.concat([df, df_insert])
-                df.set_index(['side','id'],inplace=True)
+                # df.set_index(['side','id'],inplace=True)
         except Exception as ex:
             print (ex)
         return df
@@ -116,7 +116,9 @@ class lob_bybit(object):
     def delete_lob_lines(self, df_delete):
         if self.lob_df is None:
             return
-        pass
+        self.lob_df = (pd.merge(self.lob_df,df_delete, indicator=True, how='outer')
+                        .query('_merge=="left_only"')
+                        .drop('_merge', axis=1))
 
     def update_lob_lines(self, df_update):
         if self.lob_df is None:
@@ -175,12 +177,15 @@ if __name__ == "__main__":
     # print (df_update)
     # print (df_insert)
 
-
     print (lob.lob_df)
     lob.insert_lob_lines(df_insert)
     print (lob.lob_df)
 
+    lob.delete_lob_lines(df_delete)
+    print (lob.lob_df)
 
+    lob.delete_lob_lines(df_insert)
+    print (lob.lob_df)
 
 
 
