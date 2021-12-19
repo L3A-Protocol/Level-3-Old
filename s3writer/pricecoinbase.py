@@ -1,7 +1,7 @@
 import datetime
-from log_json import log_json
+from s3writer.log_json import log_json
 from osbot_utils.utils.Json import str_to_json
-from pricebase import PriceBase
+from s3writer.pricebase import PriceBase
 
 TOPIC_COINBASE_BTCUSD   = "BTC-USD"
 TOPIC_COINBASE_ETHUSD   = "ETH-USD"

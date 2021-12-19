@@ -16,11 +16,11 @@ import math
 from threading import Timer, Thread, Lock
 from time import time
 
-from log_json import log_json
-# from opensearchclient import OpenSearchClient, Index
-from elasticsearchclient import ElasticsearchClient, Index
-from priceinfo import PriceInfo, EX_BINANCE, EX_BYBIT, EX_BYBIT_USDT, EX_COINBASE
-from sysinfo import SysInfo
+from s3writer.log_json import log_json
+# from s3writer.opensearchclient import OpenSearchClient, Index
+from s3writer.elasticsearchclient import ElasticsearchClient, Index
+from s3writer.priceinfo import PriceInfo, EX_BINANCE, EX_BYBIT, EX_BYBIT_USDT, EX_COINBASE
+from s3writer.sysinfo import SysInfo
 
 from s3connector import s3connector
 

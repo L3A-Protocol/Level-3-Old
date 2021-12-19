@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 import boto3
 from botocore.client import Config
 
-from log_json import log_json
+from s3writer.log_json import log_json
 
 class s3connector(object):
     def __init__(self, exchange:str, topic:str, symbol:str):

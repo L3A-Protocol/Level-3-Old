@@ -3,8 +3,8 @@ import json
 import numpy as np
 import pandas as pd
 
-from log_json import log_json
-from s3connector import s3connector
+from s3writer.log_json import log_json
+from s3writer.s3connector import s3connector
 
 from osbot_utils.utils.Json import str_to_json, json_to_str, json_parse
 

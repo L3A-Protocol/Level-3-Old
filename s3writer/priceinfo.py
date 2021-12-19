@@ -2,12 +2,12 @@ import sys
 
 from datetime import datetime
 from datetime import timezone
-from log_json import log_json
+from s3writer.log_json import log_json
 from osbot_utils.utils.Json import str_to_json
-from pricebybit import PriceBybit, TOPIC_BYBIT_INSURANCE, TOPIC_BYBIT_KLINE, TOPIC_BYBIT_OB200, TOPIC_BYBIT_TRADE
-from pricebybitusdt import PriceBybitUSDT, TOPIC_BYBIT_USDT_CANDLE, TOPIC_BYBIT_USDT_OB200, TOPIC_BYBIT_USDT_TRADE
-from pricebinance import PriceBinance, TOPIC_BINANCE_BINANCE
-from pricecoinbase import PriceCoinbase, TOPIC_COINBASE_BTCUSD, TOPIC_COINBASE_ETHUSD
+from s3writer.pricebybit import PriceBybit, TOPIC_BYBIT_INSURANCE, TOPIC_BYBIT_KLINE, TOPIC_BYBIT_OB200, TOPIC_BYBIT_TRADE
+from s3writer.pricebybitusdt import PriceBybitUSDT, TOPIC_BYBIT_USDT_CANDLE, TOPIC_BYBIT_USDT_OB200, TOPIC_BYBIT_USDT_TRADE
+from s3writer.pricebinance import PriceBinance, TOPIC_BINANCE_BINANCE
+from s3writer.pricecoinbase import PriceCoinbase, TOPIC_COINBASE_BTCUSD, TOPIC_COINBASE_ETHUSD
 
 EX_BYBIT        = "ByBit"
 EX_BYBIT_USDT   = "ByBit-USDT"

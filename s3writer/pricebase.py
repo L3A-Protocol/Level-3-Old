@@ -1,5 +1,5 @@
 import datetime
-from log_json import log_json
+from s3writer.log_json import log_json
 from osbot_utils.utils.Json import str_to_json
 
 class PriceBase(object):
