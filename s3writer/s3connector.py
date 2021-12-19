@@ -12,6 +12,7 @@ from log_json import log_json
 
 class s3connector(object):
     def __init__(self, exchange:str, topic:str, symbol:str):
+        load_dotenv(override=True)
         self.exchange = exchange
         self.topic = topic
         self.symbol = symbol
