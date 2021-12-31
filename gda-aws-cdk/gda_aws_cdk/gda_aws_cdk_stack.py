@@ -334,9 +334,20 @@ class GdaAwsCdkStack(cdk.Stack):
 
         cluster = ecs.Cluster(self, "GDADataLakeCluster", vpc=vpc)
 
-        s3_role = iam.Role(self,
+        # Create a Role for ESC tasks
+        ecs_tasks_role = iam.Role(self,
             id='ecs-s3-access-role',
-            assumed_by=iam.ServicePrincipal("ecs-tasks.amazonaws.com"),
+            assumed_by=iam.ServicePrincipal("ecs-tasks.amazonaws.com"))
+
+        # Create and attach policy that gives permissions to write to the S3 bucket.
+        iam.Policy(
+            self, 's3_attr',
+            policy_name='s3_access',
+            statements=[iam.PolicyStatement(
+                actions=['s3:*'],
+                resources=['arn:aws:s3:::' + bucket.bucket_name + '/*'])],
+                # resources=['*'])],
+            roles=[ecs_tasks_role],
         )
 
         self.BinanceDeployment  (bucket=bucket, vpc=vpc, cluster=cluster)
