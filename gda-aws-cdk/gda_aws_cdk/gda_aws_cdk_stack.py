@@ -8,7 +8,9 @@ from aws_cdk import (core as cdk,
                      aws_s3 as s3,
                      aws_ec2 as ec2,
                      aws_ecs as ecs,
-                     aws_lambda as _lambda)
+                     aws_lambda as _lambda,
+                     aws_iam as iam,
+                     )
 
 from fargate.binance    import BinanceConstruct
 from fargate.bybit      import BybitConstruct
@@ -331,6 +333,11 @@ class GdaAwsCdkStack(cdk.Stack):
         vpc = ec2.Vpc(self, "GDADataLakeVpc", max_azs=3)
 
         cluster = ecs.Cluster(self, "GDADataLakeCluster", vpc=vpc)
+
+        s3_role = iam.Role(self,
+            id='ecs-s3-access-role',
+            assumed_by=iam.ServicePrincipal("ecs-tasks.amazonaws.com"),
+        )
 
         self.BinanceDeployment  (bucket=bucket, vpc=vpc, cluster=cluster)
         self.BybitDeployment    (bucket=bucket, vpc=vpc, cluster=cluster)
