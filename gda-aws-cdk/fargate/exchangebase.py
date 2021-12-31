@@ -19,6 +19,7 @@ class ExchangeBase(cdk.Construct):
                 topic: str,
                 symbol: str,
                 feed_interval=DEFAULT_FEED_INTERVAL,
+                role = None,
                 **kwargs):
         super().__init__(scope, id, **kwargs)
 
@@ -31,7 +32,7 @@ class ExchangeBase(cdk.Construct):
         container_id = (f'{service_prefix}-{topic}-{symbol_lower}-container').replace('.','-')
         stream_prefix = "ecs"
 
-        task_definition = ecs.FargateTaskDefinition( self, task_id,
+        task_definition = ecs.FargateTaskDefinition( self, task_id, execution_role=role, task_role=role,
                 cpu=256, memory_limit_mib=512)
 
         repo = ecr.Repository.from_repository_arn(self, f'{service_prefix}-repo', repo_arn)
