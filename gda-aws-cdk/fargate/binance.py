@@ -12,5 +12,5 @@ REPO_ARN            = "arn:aws:ecr:us-west-1:381452754685:repository/binance"
 
 class BinanceConstruct(ExchangeBase):
 
-    def __init__(self, scope: cdk.Construct, id: str, bucket: s3.Bucket, cluster: ecs.Cluster, topic:str, symbol:str, **kwargs):
-        super().__init__(scope, id, EXCHNAGE_NAME, BIN_PATH, REPO_ARN, bucket, cluster, topic, symbol, **kwargs)
+    def __init__(self, scope: cdk.Construct, id: str, bucket: s3.Bucket, cluster: ecs.Cluster, topic:str, symbol:str, role=None, **kwargs):
+        super().__init__(scope, id, EXCHNAGE_NAME, BIN_PATH, REPO_ARN, bucket, cluster, topic, symbol, role=role, **kwargs)
