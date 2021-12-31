@@ -390,9 +390,9 @@ class GdaAwsCdkStack(cdk.Stack):
             roles=[ecs_tasks_role],
         )
 
-        self.BinanceDeployment  (bucket=bucket, vpc=vpc, cluster=cluster)
-        self.BybitDeployment    (bucket=bucket, vpc=vpc, cluster=cluster)
-        self.BybitUSDTDeployment(bucket=bucket, vpc=vpc, cluster=cluster)
+        self.BinanceDeployment  (bucket=bucket, vpc=vpc, cluster=cluster, role=ecs_tasks_role)
+        self.BybitDeployment    (bucket=bucket, vpc=vpc, cluster=cluster, role=ecs_tasks_role)
+        self.BybitUSDTDeployment(bucket=bucket, vpc=vpc, cluster=cluster, role=ecs_tasks_role)
         self.CoinbaseDeployment (bucket=bucket, vpc=vpc, cluster=cluster, role=ecs_tasks_role)
 
 
